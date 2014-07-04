@@ -11,9 +11,9 @@ namespace Cornfield.SudokuSolver.Library
 {
     public class SmartSudokuTileGroup : SudokuTileGroup<SmartSudokuTile>, ISudokuTileGroup<SmartSudokuTile>
     {
-        public List<ISudokuSolver> Solvers = new List<ISudokuSolver>();
         public HashSet<int> AllPossibleValues = new HashSet<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        public EventHandler<TileGroupUpdatingEventArgs> TileGroupUpdating;
+        public EventHandler<TileGroupUpdatingEventArgs> TileGroupUpdated;
+        public bool InSolverQueue { get; set; }
         public SmartSudokuTileGroup() : base()
         {
 
@@ -21,19 +21,16 @@ namespace Cornfield.SudokuSolver.Library
 
         public new void Init()
         {
+            InSolverQueue = false;
+
             // Add the TileSolved event handler to each tile in this group
             Tiles.ForEach(delegate(SmartSudokuTile tile) { tile.TileSolved += this.TileSolved; });
         }
 
-        public void Solve()
+        public void Start()
         {
             // Fire the OnTileSolved on all of our initially filled in tiles
             Tiles.ForEach(delegate(SmartSudokuTile tile) { if (tile.State == TileStates.Solved) tile.OnTileSolved(); });
-        }
-
-        public void AddSolver(ISudokuSolver solver)
-        {
-            Solvers.Add(solver);
         }
 
         public void TileSolved(object sender, TileSolvedEventArgs args)
@@ -42,10 +39,16 @@ namespace Cornfield.SudokuSolver.Library
 
             //Console.WriteLine("{0},{1}: Solved.  Group {2} Updating.", args.Tile.XPos, args.Tile.YPos, Id);
             UpdatePossibleValues(val);
-            
-            EventHandler<TileGroupUpdatingEventArgs> handler = TileGroupUpdating;
-            if (handler != null)
-                handler(this, new TileGroupUpdatingEventArgs(this));
+
+            // If this tile group isn't already in the queue, raise the event to add it
+            if (!InSolverQueue)
+            {
+                EventHandler<TileGroupUpdatingEventArgs> handler = TileGroupUpdated;
+                if (handler != null)
+                    handler(this, new TileGroupUpdatingEventArgs(this));
+
+                InSolverQueue = true;
+            }   
         }
 
         public void UpdatePossibleValues(int val)
@@ -59,16 +62,6 @@ namespace Cornfield.SudokuSolver.Library
                 if (tile.State == TileStates.Solved) continue;
                 tile.RemovePossibleValue(val);
             } 
-        }
-
-        public void RunSolvers() 
-        {
-            //Console.WriteLine("Group {0} running solvers", Id);
-            //if (!IsValid())
-                //Console.WriteLine("Group {0} is invalid before Solvers", Id);
-            foreach(var solver in Solvers) solver.SolveGroup(this);
-            //if (!IsValid())
-                //Console.WriteLine("Group {0} is invalid after Solvers", Id);
         }
     }
 }
