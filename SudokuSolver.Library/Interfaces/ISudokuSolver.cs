@@ -10,6 +10,6 @@ namespace Cornfield.SudokuSolver.Library.Interfaces
 {
     public interface ISudokuSolver
     {
-        void SolveGroup(SmartSudokuTileGroup group);
+        void SolveGroup(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain);
     }
 }

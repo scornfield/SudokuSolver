@@ -11,12 +11,12 @@ namespace Cornfield.SudokuSolver.Library
 {
     class BruteForceSolver : ISudokuSolver
     {
-        public void SolveGroup(SmartSudokuTileGroup group)
+        public void SolveGroup(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain)
         {
-            StaticSolveGroup(group);
+            StaticSolveGroup(group, confidence);
         }
 
-        public static void StaticSolveGroup(SmartSudokuTileGroup group)
+        public static void StaticSolveGroup(SmartSudokuTileGroup group, TileConfidence confidence)
         {
 
         }

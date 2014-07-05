@@ -22,6 +22,8 @@ namespace Cornfield.SudokuSolver.Library
 
     public class SmartSudokuTile: SudokuTile, ISudokuTile
     {
+        
+
         public override int? Value
         {
             get
@@ -32,7 +34,11 @@ namespace Cornfield.SudokuSolver.Library
             {
                 if (State == TileStates.Solved) 
                     Console.WriteLine("Already Solved");
+                
+                // Set the value
                 _value = value;
+
+                // If the tile is not null, then set it as solved and raise the TileSolved event.
                 if (_value != null)
                 {
                     State = TileStates.Solved;
@@ -44,7 +50,7 @@ namespace Cornfield.SudokuSolver.Library
         }
 
         [JsonIgnore]
-        public List<int> PossibleValues { get; protected set; }
+        public List<int> PossibleValues { get; set; }
 
         [JsonIgnore]
         public TileStates State { get; protected set; }
@@ -55,32 +61,83 @@ namespace Cornfield.SudokuSolver.Library
         [JsonIgnore]
         private int? TempValue { get; set; }
 
+        // Initialize a new tile with no value.
         public SmartSudokuTile() : base()
         {
-            PossibleValues = new List<int>() {1, 2, 3, 4, 5, 6, 7, 8, 9};
             State = TileStates.NoProgress;
         }
 
+        // Initialize a new tile with an existing value.
         public SmartSudokuTile(int? val) : base(val)
         {
             Reason = "Initialized";
+        }
+
+        // Initialize the tile from an integer.  Used for deserializing the Json object.
+        public static implicit operator SmartSudokuTile(Int64 val)
+        {
+            SmartSudokuTile tile = val == 0 ? new SmartSudokuTile() : new SmartSudokuTile((int)val);
+            return tile;
         }
 
         public void SetValue(int val, TileConfidence conf, string reason = "Unknown")
         {
             //Console.WriteLine("{0},{1}: Setting Value {2} because {3}", XPos, YPos, val, reason);
             if (!PossibleValues.Contains(val)) 
-            { 
-                //Console.WriteLine("Don't do it!"); 
-                return; 
-            }
+                throw new Exception("Trying to set the tile's value to an invalid value");
 
-
+            // Set the reason for this value being set
             Reason = reason;
+
+            // If this isn't a guess, then set the value, otherwise set the temporary value
             if (conf == TileConfidence.Certain)
                 Value = val;
             else
+            {
+                State = TileStates.Guessed;
                 TempValue = val;
+            }
+        }
+
+        // When the tile is solved, this creates an event handler to alert all of its groups to the change
+        public void OnTileSolved()
+        {
+            //Console.WriteLine("{0},{1}: Firing Events", XPos, YPos);
+            EventHandler<TileSolvedEventArgs> handler = TileSolved;
+            if (handler != null)
+                handler(this, new TileSolvedEventArgs(this));
+            //Console.WriteLine("{0},{1}: Events Complete", XPos, YPos);
+        }
+
+        // Remove a value from the remaining possible values for this tile.
+        public void RemovePossibleValue(int val, bool setValue = true)
+        {
+            // If this tile is already solved, stop here
+            if (State == TileStates.Solved) return;
+            
+            // Remove the value from the possible values list
+            PossibleValues.Remove(val);
+
+            // If we are allowed to set the value now, then do it
+            if (setValue)
+            {
+                SetOnlyRemainingValue();
+                return;
+            }
+
+            // If there are no possible values left for this tile, throw an exception
+            if (PossibleValues.Count == 0)
+                throw new Exception("No Remaining Possible Values for Tile");
+        }
+
+        // Check if there is only one remaining possible value for this tile and if there is, set that as its value.
+        public void SetOnlyRemainingValue(string reason = "Only Remaining Possibility", TileConfidence confidence = TileConfidence.Certain)
+        {
+            if (PossibleValues.Count == 1)
+            {
+                SetValue(PossibleValues.ElementAt(0), confidence, reason);
+                return;
+            }
         }
 
         public void ClearGuess()
@@ -96,46 +153,6 @@ namespace Cornfield.SudokuSolver.Library
             Value = TempValue;
             TempValue = null;
             PossibleValues.Clear();
-        }
-
-        public static implicit operator SmartSudokuTile(Int64 val)
-        {
-            SmartSudokuTile tile = val == 0 ? new SmartSudokuTile() : new SmartSudokuTile((int)val);
-            return tile;
-        }
-
-        public void OnTileSolved()
-        {
-            //Console.WriteLine("{0},{1}: Firing Events", XPos, YPos);
-            EventHandler<TileSolvedEventArgs> handler = TileSolved;
-            if (handler != null)
-                handler(this, new TileSolvedEventArgs(this));
-            //Console.WriteLine("{0},{1}: Events Complete", XPos, YPos);
-        }
-
-        public void RemovePossibleValue(int val, bool setValue = true)
-        {
-            if (State == TileStates.Solved) return;
-            
-            PossibleValues.Remove(val);
-
-            if (setValue)
-            {
-                SetOnlyRemainingValue();
-                return;
-            }
-
-            if (PossibleValues.Count == 0)
-                throw new Exception("No Remaining Possible Values for Tile");
-        }
-
-        public void SetOnlyRemainingValue(string reason = "Only Remaining Possibility")
-        {
-            if (PossibleValues.Count == 1)
-            {
-                SetValue(PossibleValues.ElementAt(0), TileConfidence.Certain, reason);
-                return;
-            }
         }
 
     }

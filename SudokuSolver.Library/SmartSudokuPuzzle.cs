@@ -37,11 +37,11 @@ namespace Cornfield.SudokuSolver.Library
         // Try to solve the puzzle
         public void Solve()
         {
-            // Start each groups self-solving events
-            foreach (var group in TileGroups)
-            {
-                group.Start();
-            }
+            // Fire off the solved event on each already initialized tile to begin solving the puzzle
+            foreach (var row in Board)
+                foreach (var tile in row)
+                    if(tile.State == TileStates.Solved)
+                        tile.OnTileSolved();
 
             // Run our custom solvers
             RunSolvers();
