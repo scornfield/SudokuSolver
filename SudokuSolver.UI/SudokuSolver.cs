@@ -23,32 +23,19 @@ namespace Cornfield.SudokuSolver.UI
         {
             InitializeComponent();
 
-            /*HttpWebRequest wr = (HttpWebRequest)WebRequest.Create("http://codecampcontest.azurewebsites.net/api/test");
-            HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-            StreamReader reader = new StreamReader(response.GetResponseStream());
-            string json = reader.ReadToEnd();
+            RunTest();
+        }
 
-            reader.Close();
-            Console.WriteLine(json);
-            Console.ReadLine();
+        private void RunTest()
+        {
+            lblTitle.Text = "Sudoku Solver Running Warm Up Test";
+
+            string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
 
             DateTime begin = DateTime.UtcNow;
 
             SmartSudokuPuzzle puz = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
-            lblTitle.Text = "Sudoku Solver Warming Up...";
-            puz.Solver = "Andrew Nguyen";
-
-            puz.Init();
-            puz.AddSolver(new PlaceFindingSolver());
-
-            puz.PrintBoard();
-
-            puz.Solve();
-
-            Console.WriteLine();
-            ShowBoard(puz);
-
-
+            solvePuzzle(puz);
 
             DateTime end = DateTime.UtcNow;
 
@@ -59,19 +46,12 @@ namespace Cornfield.SudokuSolver.UI
 
             lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
             puz.PrintBoard();
-            Console.ReadLine();*/
+            Console.ReadLine();
         }
 
         private void btnNew_Click(object sender, EventArgs e)
         {
-            HttpWebRequest wr = (HttpWebRequest)WebRequest.Create("http://codecampcontest.azurewebsites.net/api/random");
-            HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
-            StreamReader reader = new StreamReader(response.GetResponseStream());
-            string json = reader.ReadToEnd();
-
-            reader.Close();
-            Console.WriteLine(json);
-            Console.ReadLine();
+            string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
 
             DateTime begin = DateTime.UtcNow;
 
@@ -79,21 +59,14 @@ namespace Cornfield.SudokuSolver.UI
             lblTitle.Text = string.Format("Sudoku Puzzle #{0}", puz.Id);
             puz.Solver = "Andrew Nguyen";
 
-            puz.Init();
-            puz.AddSolver(new PlaceFindingSolver());
-
-            puz.PrintBoard();
-
-            puz.Solve();
-
-            Console.WriteLine();
-            ShowBoard(puz);
-
-
+            solvePuzzle(puz);
 
             DateTime end = DateTime.UtcNow;
 
-            if (puz.TileGroups.Any(x => !x.IsValid())) txtResponseJson.Text = "Board is invalid";
+            if (puz.TileGroups.Any(x => !x.IsValid())) 
+                txtRequestJson.Text = "Board is invalid";
+            if (puz.TileGroups.Any(x => !x.Solved)) 
+                txtResponseJson.Text = "Board is incomplete";
 
             ShowBoard(puz);
 
@@ -101,6 +74,41 @@ namespace Cornfield.SudokuSolver.UI
             lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
             puz.PrintBoard();
             Console.ReadLine();
+        }
+
+        private string getJsonBoard(string url)
+        {
+            HttpWebRequest wr = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)wr.GetResponse();
+            StreamReader reader = new StreamReader(response.GetResponseStream());
+            string json = reader.ReadToEnd();
+
+            reader.Close();
+            //Console.WriteLine(json);
+            Console.ReadLine();
+
+            return json;
+        }
+
+        private void solvePuzzle(SmartSudokuPuzzle puz) {
+            
+            puz.Init();
+            puz.AddSolver(new PlaceFindingSolver());
+            puz.AddSolver(new OccupancyTheoremSolver());
+
+            puz.PrintBoard();
+            ShowBoard(puz);
+
+            
+
+            puz.Solve();
+
+            //Console.WriteLine();
+            
+
+
+
+          
         }
 
         private void ShowBoard(SudokuPuzzle<SmartSudokuTileGroup, SmartSudokuTile> puzzle)

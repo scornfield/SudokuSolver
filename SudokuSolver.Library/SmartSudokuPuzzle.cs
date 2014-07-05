@@ -50,15 +50,22 @@ namespace Cornfield.SudokuSolver.Library
         // Run each solver on every group in the queue
         public void RunSolvers()
         {
-            // Loop until we run out of groups in the queue
+            // Loop through our solvers and process each group in the queue
+            // TODO: Try to get it to do all of the more efficient solvers first.
             while (_solverQueue.Count > 0)
             {
+                var group = _solverQueue[0];
+                _solverQueue.RemoveAt(0);
+                group.InSolverQueue = false;
                 foreach (var solver in _solvers)
                 {
-                    _solverQueue[0].InSolverQueue = false;
-                    solver.SolveGroup(_solverQueue[0]);
+                    if (group.Solved) break;
+                    //Console.WriteLine("Group {0}: Running {1}", group.Id, solver.ToString());
+                    
+                    solver.SolveGroup(group);
                 }
-                _solverQueue.RemoveAt(0);
+                //if(!group.IsValid()) Console.WriteLine("Group {0} is now invalid", _solverQueue[0].Id);
+                
             }
         }
 

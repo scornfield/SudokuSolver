@@ -9,14 +9,14 @@ using Cornfield.Sudoku.Library;
 
 namespace Cornfield.SudokuSolver.Library
 {
-    class BruteForceSolver
+    class BruteForceSolver : ISudokuSolver
     {
-        public static void SolvePuzzle(SudokuPuzzle<SmartSudokuTileGroup, SmartSudokuTile> puzzle)
+        public void SolveGroup(SmartSudokuTileGroup group)
         {
-
+            StaticSolveGroup(group);
         }
 
-        public static void SolveGroup(SmartSudokuTileGroup group)
+        public static void StaticSolveGroup(SmartSudokuTileGroup group)
         {
 
         }

@@ -10,7 +10,6 @@ namespace Cornfield.SudokuSolver.Library.Interfaces
 {
     public interface ISudokuSolver
     {
-        void SolvePuzzle(SudokuPuzzle<SmartSudokuTileGroup, SmartSudokuTile> puzzle);
         void SolveGroup(SmartSudokuTileGroup group);
     }
 }

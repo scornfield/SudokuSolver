@@ -11,7 +11,7 @@ namespace Cornfield.SudokuSolver.Library
 {
     public enum TileStates
     {
-        Solved, Guessed, NoProgress
+        NoProgress, Guessed, Solved
     }
 
     public enum TileConfidence
@@ -30,17 +30,21 @@ namespace Cornfield.SudokuSolver.Library
             }
             protected set
             {
+                if (State == TileStates.Solved) 
+                    Console.WriteLine("Already Solved");
                 _value = value;
-                State = TileStates.Solved;
-                OnTileSolved();
-                if (PossibleValues != null)
-                    PossibleValues.Clear();
-                
+                if (_value != null)
+                {
+                    State = TileStates.Solved;
+                    OnTileSolved();
+                    if (PossibleValues != null)
+                        PossibleValues.Clear();
+                }
             }
         }
 
         [JsonIgnore]
-        public HashSet<int> PossibleValues { get; protected set; }
+        public List<int> PossibleValues { get; protected set; }
 
         [JsonIgnore]
         public TileStates State { get; protected set; }
@@ -53,13 +57,12 @@ namespace Cornfield.SudokuSolver.Library
 
         public SmartSudokuTile() : base()
         {
-            PossibleValues = new HashSet<int>() {1, 2, 3, 4, 5, 6, 7, 8, 9};
+            PossibleValues = new List<int>() {1, 2, 3, 4, 5, 6, 7, 8, 9};
             State = TileStates.NoProgress;
         }
 
         public SmartSudokuTile(int? val) : base(val)
         {
-            State = TileStates.Solved;
             Reason = "Initialized";
         }
 
@@ -110,18 +113,29 @@ namespace Cornfield.SudokuSolver.Library
             //Console.WriteLine("{0},{1}: Events Complete", XPos, YPos);
         }
 
-        public void RemovePossibleValue(int val)
+        public void RemovePossibleValue(int val, bool setValue = true)
         {
-            PossibleValues.Remove(val);
+            if (State == TileStates.Solved) return;
             
-            if (PossibleValues.Count == 1)
+            PossibleValues.Remove(val);
+
+            if (setValue)
             {
-                SetValue(PossibleValues.ElementAt(0), TileConfidence.Certain, "Only Remaining Possibility");
+                SetOnlyRemainingValue();
                 return;
             }
 
             if (PossibleValues.Count == 0)
                 throw new Exception("No Remaining Possible Values for Tile");
+        }
+
+        public void SetOnlyRemainingValue(string reason = "Only Remaining Possibility")
+        {
+            if (PossibleValues.Count == 1)
+            {
+                SetValue(PossibleValues.ElementAt(0), TileConfidence.Certain, reason);
+                return;
+            }
         }
 
     }
