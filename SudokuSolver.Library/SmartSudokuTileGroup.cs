@@ -11,12 +11,10 @@ namespace Cornfield.SudokuSolver.Library
 {
     public class SmartSudokuTileGroup : SudokuTileGroup<SmartSudokuTile>, ISudokuTileGroup<SmartSudokuTile>
     {
-        public List<ISudokuTile> SolvedTiles = new List<ISudokuTile>();
         public List<int> AllPossibleValues = new List<int>();
         public EventHandler<TileGroupUpdatingEventArgs> TileGroupUpdated;
         public bool InSolverQueue { get; set; }
-        public bool Solved { get { return _tilesSolved == Tiles.Count; } }
-        private int _tilesSolved = 0;
+        public bool Solved { get { return AllPossibleValues.Count == 0; } }
         public SmartSudokuTileGroup() : base()
         {
 
@@ -36,25 +34,11 @@ namespace Cornfield.SudokuSolver.Library
             Tiles.ForEach(delegate(SmartSudokuTile tile) { if(tile.State != TileStates.Solved) tile.PossibleValues = AllPossibleValues.ToList(); });
         }
 
-        public void Start()
-        {
-            // Fire the OnTileSolved on all of our initially filled in tiles
-            //Tiles.ForEach(delegate(SmartSudokuTile tile) { if (tile.State == TileStates.Solved) tile.OnTileSolved(); });
-            foreach(var tile in Tiles)
-                if (tile.State == TileStates.Solved) 
-                    tile.OnTileSolved();
-        }
-
         public void TileSolved(object sender, TileSolvedEventArgs args)
         {
-            _tilesSolved++;
             int val = (int)args.Tile.Value;
 
-            if (SolvedTiles.Contains(args.Tile))
-                Console.WriteLine("Why??");
-            SolvedTiles.Add(args.Tile);
-
-            Console.WriteLine("{0},{1}: Solved.  Group {2} Updating.", args.Tile.XPos, args.Tile.YPos, Id);
+            //Console.WriteLine("{0},{1}: Solved.  Group {2} Updating.", args.Tile.XPos, args.Tile.YPos, Id);
             UpdatePossibleValues(val);
 
             OnTileGroupUpdated();
@@ -63,7 +47,7 @@ namespace Cornfield.SudokuSolver.Library
         // This gets called any time that a tile in this group is solved or has its remaining possible values updated
         public void OnTileGroupUpdated()
         {
-            // If this tile group isn't already in the queue, raise the event to add it
+            // If this tile group isn't already in the queue or completely solved, raise the event to add it
             if (!InSolverQueue && !Solved)
             {
                 EventHandler<TileGroupUpdatingEventArgs> handler = TileGroupUpdated;
@@ -78,6 +62,7 @@ namespace Cornfield.SudokuSolver.Library
         // Update the possible values for this group and each of its tile to remove the given value
         public void UpdatePossibleValues(int val)
         {
+            ActionRecorder.Record(string.Format("Group {0}: Removing Possible Value {1}.", Id, val));
             //Console.WriteLine("Group {0}: Removing Possible Value {1}.", Id, val);
             AllPossibleValues.Remove(val);
 

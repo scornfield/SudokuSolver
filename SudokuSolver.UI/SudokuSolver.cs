@@ -30,6 +30,9 @@ namespace Cornfield.SudokuSolver.UI
         {
             lblTitle.Text = "Sudoku Solver Running Warm Up Test";
 
+            ActionRecorder.Init();
+            
+
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
 
             DateTime begin = DateTime.UtcNow;
@@ -39,10 +42,10 @@ namespace Cornfield.SudokuSolver.UI
 
             DateTime end = DateTime.UtcNow;
 
-            if (puz.TileGroups.Any(x => !x.IsValid())) txtResponseJson.Text = "Board is invalid";
+            if (puz.TileGroups.Any(x => !x.IsValid())) lblStatus.Text += "Board is invalid";
 
             ShowBoard(puz);
-
+            lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
 
             lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
             puz.PrintBoard();
@@ -54,6 +57,9 @@ namespace Cornfield.SudokuSolver.UI
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
 
             DateTime begin = DateTime.UtcNow;
+            lblStatus.Text = "";
+            ActionRecorder.Init();
+            lstActions.Items.Clear();
 
             SmartSudokuPuzzle puz = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
             lblTitle.Text = string.Format("Sudoku Puzzle #{0}", puz.Id);
@@ -64,12 +70,12 @@ namespace Cornfield.SudokuSolver.UI
             DateTime end = DateTime.UtcNow;
 
             if (puz.TileGroups.Any(x => !x.IsValid())) 
-                txtRequestJson.Text = "Board is invalid";
-            if (puz.TileGroups.Any(x => !x.Solved)) 
-                txtResponseJson.Text = "Board is incomplete";
+                lblStatus.Text += "Board is invalid";
+            if (puz.TileGroups.Any(x => !x.Solved))
+                lblStatus.Text += "Board is incomplete";
 
             ShowBoard(puz);
-
+            lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
 
             lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
             puz.PrintBoard();
@@ -95,6 +101,7 @@ namespace Cornfield.SudokuSolver.UI
             puz.Init();
             puz.AddSolver(new PlaceFindingSolver());
             puz.AddSolver(new OccupancyTheoremSolver());
+            puz.AddSolver(new EliminationSolver());
 
             puz.PrintBoard();
             ShowBoard(puz);

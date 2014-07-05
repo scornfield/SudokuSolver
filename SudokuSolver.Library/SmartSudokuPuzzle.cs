@@ -43,6 +43,7 @@ namespace Cornfield.SudokuSolver.Library
                     if(tile.State == TileStates.Solved)
                         tile.OnTileSolved();
 
+            ActionRecorder.Record("All Tiles Initialized - Starting Solvers");
             // Run our custom solvers
             RunSolvers();
         }
@@ -55,12 +56,14 @@ namespace Cornfield.SudokuSolver.Library
             while (_solverQueue.Count > 0)
             {
                 var group = _solverQueue[0];
+
                 _solverQueue.RemoveAt(0);
                 group.InSolverQueue = false;
                 foreach (var solver in _solvers)
                 {
                     if (group.Solved) break;
-                    //Console.WriteLine("Group {0}: Running {1}", group.Id, solver.ToString());
+
+                    ActionRecorder.Record(string.Format("Group {0}: Running {1}", group.Id, solver.ToString()));
                     
                     solver.SolveGroup(group);
                 }

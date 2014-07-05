@@ -37,5 +37,10 @@ namespace Cornfield.SudokuSolver.Library
                     
             }
         }
+
+        public override string ToString()
+        {
+            return "Place Finding Solver";
+        }
     }
 }

@@ -42,7 +42,6 @@ namespace Cornfield.SudokuSolver.Library
                 if (_value != null)
                 {
                     State = TileStates.Solved;
-                    OnTileSolved();
                     if (PossibleValues != null)
                         PossibleValues.Clear();
                 }
@@ -52,8 +51,22 @@ namespace Cornfield.SudokuSolver.Library
         [JsonIgnore]
         public List<int> PossibleValues { get; set; }
 
+        private TileStates _state;
         [JsonIgnore]
-        public TileStates State { get; protected set; }
+        public TileStates State {
+            get
+            {
+                return _state;
+            } 
+            protected set 
+            {
+                if (_state != value)
+                {
+                    _state = value;
+                    OnTileSolved();
+                }
+            } 
+        }
         
         [JsonIgnore]
         public string Reason { get; set; }
@@ -62,7 +75,7 @@ namespace Cornfield.SudokuSolver.Library
         private int? TempValue { get; set; }
 
         // Initialize a new tile with no value.
-        public SmartSudokuTile() : base()
+        public SmartSudokuTile() : this(null)
         {
             State = TileStates.NoProgress;
         }
@@ -70,7 +83,8 @@ namespace Cornfield.SudokuSolver.Library
         // Initialize a new tile with an existing value.
         public SmartSudokuTile(int? val) : base(val)
         {
-            Reason = "Initialized";
+            if(val != null)
+                Reason = "Initialized";
         }
 
         // Initialize the tile from an integer.  Used for deserializing the Json object.
@@ -80,9 +94,11 @@ namespace Cornfield.SudokuSolver.Library
             return tile;
         }
 
+        private bool _solveHandled = false;
+
         public void SetValue(int val, TileConfidence conf, string reason = "Unknown")
         {
-            //Console.WriteLine("{0},{1}: Setting Value {2} because {3}", XPos, YPos, val, reason);
+            ActionRecorder.Record(string.Format("{0},{1}: Setting Value {2} because {3}", XPos, YPos, val, reason));
             if (!PossibleValues.Contains(val)) 
                 throw new Exception("Trying to set the tile's value to an invalid value");
 
@@ -104,8 +120,12 @@ namespace Cornfield.SudokuSolver.Library
         {
             //Console.WriteLine("{0},{1}: Firing Events", XPos, YPos);
             EventHandler<TileSolvedEventArgs> handler = TileSolved;
-            if (handler != null)
+            if (!_solveHandled && handler != null)
+            {
+                _solveHandled = true;
                 handler(this, new TileSolvedEventArgs(this));
+            }
+                
             //Console.WriteLine("{0},{1}: Events Complete", XPos, YPos);
         }
 
@@ -114,7 +134,9 @@ namespace Cornfield.SudokuSolver.Library
         {
             // If this tile is already solved, stop here
             if (State == TileStates.Solved) return;
-            
+
+            ActionRecorder.Record(string.Format("{0},{1}: Removing {2} from possible values.", XPos, YPos, val));
+
             // Remove the value from the possible values list
             PossibleValues.Remove(val);
 
@@ -135,7 +157,7 @@ namespace Cornfield.SudokuSolver.Library
         {
             if (PossibleValues.Count == 1)
             {
-                SetValue(PossibleValues.ElementAt(0), confidence, reason);
+                SetValue(PossibleValues[0], confidence, reason);
                 return;
             }
         }
