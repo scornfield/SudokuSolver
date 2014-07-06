@@ -19,67 +19,44 @@ namespace Cornfield.SudokuSolver.UI
 {
     public partial class SudokuSolver : Form
     {
+        protected SmartSudokuPuzzle _puzzle;
+        protected bool _boardEditable = false;
         public SudokuSolver()
         {
             InitializeComponent();
 
-            RunTest();
+            WarmUp();
         }
 
-        private void RunTest()
+        private void WarmUp()
         {
             lblTitle.Text = "Sudoku Solver Running Warm Up Test";
 
             ActionRecorder.Init();
-            
 
-            string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
+            //string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
 
-            DateTime begin = DateTime.UtcNow;
-
-            SmartSudokuPuzzle puz = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
-            solvePuzzle(puz);
-
-            DateTime end = DateTime.UtcNow;
-
-            if (puz.TileGroups.Any(x => !x.IsValid())) lblStatus.Text += "Board is invalid";
-
-            ShowBoard(puz);
-            lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
-
-            lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
-            puz.PrintBoard();
-            Console.ReadLine();
+            //_puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            //solvePuzzle();
+            //solveComplete();
         }
 
-        private void btnNew_Click(object sender, EventArgs e)
+        private void btnGetNew_Click(object sender, EventArgs e)
         {
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
+            _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            ShowBoard();
+        }
 
-            DateTime begin = DateTime.UtcNow;
+        private void reset()
+        {
+            if (grdBoard.Rows != null) grdBoard.Rows.Clear();
+            if (grdBoard.Columns != null) grdBoard.Columns.Clear();
             lblStatus.Text = "";
-            ActionRecorder.Init();
-            lstActions.Items.Clear();
+            lblTime.Text = "";
 
-            SmartSudokuPuzzle puz = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
-            lblTitle.Text = string.Format("Sudoku Puzzle #{0}", puz.Id);
-            puz.Solver = "Andrew Nguyen";
-
-            solvePuzzle(puz);
-
-            DateTime end = DateTime.UtcNow;
-
-            if (puz.TileGroups.Any(x => !x.IsValid())) 
-                lblStatus.Text += "Board is invalid";
-            if (puz.TileGroups.Any(x => !x.Solved))
-                lblStatus.Text += "Board is incomplete";
-
-            ShowBoard(puz);
-            lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
-
-            lblTime.Text = "Measured time: " + (end - begin).TotalMilliseconds + " ms.";
-            puz.PrintBoard();
-            Console.ReadLine();
+            if (lstActions.Items != null) lstActions.Items.Clear();
+            if (ActionRecorder.Actions != null) ActionRecorder.Actions.Clear();
         }
 
         private string getJsonBoard(string url)
@@ -96,48 +73,100 @@ namespace Cornfield.SudokuSolver.UI
             return json;
         }
 
-        private void solvePuzzle(SmartSudokuPuzzle puz) {
-            
-            puz.Init();
-            puz.AddSolver(new PlaceFindingSolver());
-            puz.AddSolver(new OccupancyTheoremSolver());
-            puz.AddSolver(new EliminationSolver());
+        private void solvePuzzle() 
+        {
+            if (_boardEditable) createNewPuzzleFromBoard();
+            _puzzle.Init();
+            _puzzle.AddSolver(new PlaceFindingSolver());
+            _puzzle.AddSolver(new OccupancyTheoremSolver());
+            _puzzle.AddSolver(new EliminationSolver());
 
-            puz.PrintBoard();
-            ShowBoard(puz);
-
-            
-
-            puz.Solve();
-
-            //Console.WriteLine();
-            
-
-
-
-          
+            _puzzle.Solve();
         }
 
-        private void ShowBoard(SudokuPuzzle<SmartSudokuTileGroup, SmartSudokuTile> puzzle)
+        private void solveComplete(TimeSpan time)
+        {
+            solveComplete();
+            lblTime.Text = time.TotalMilliseconds + " ms.";
+        }
+
+        private void solveComplete()
+        {
+            lblStatus.Text = "Solve Complete.";
+            if (_puzzle.TileGroups.Any(x => !x.Solved)) lblStatus.Text += " Board is incomplete.";
+            if (_puzzle.TileGroups.Any(x => !x.IsValid())) lblStatus.Text += " Board is invalid.";
+
+            ShowBoard();
+            lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
+        }
+
+        private void ShowBoard()
         {
             grdBoard.Columns.Clear();
             grdBoard.Rows.Clear();
 
-            for (int col = 0; col < puzzle.Board[0].Count; col++)
+            for (int col = 0; col < _puzzle.Board[0].Count; col++)
             {
                 grdBoard.Columns.Add(col.ToString(), col.ToString());
             }
-            puzzle.Board.ForEach(delegate(List<SmartSudokuTile> row) { grdBoard.Rows.Add(row.ToArray<object>()); });
-
-            
+            _puzzle.Board.ForEach(delegate(List<SmartSudokuTile> row) { grdBoard.Rows.Add(row.ToArray<object>()); });
         }
 
         private void grdBoard_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
+            if (_boardEditable) return;
+
             var tile = ((SmartSudokuTile)grdBoard.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
+            if (tile == null) return;
+
             lblTileInfo.Text = tile.PossibleValues == null || tile.PossibleValues.Count == 0 ? "No Possible Values" : string.Join(", ", tile.PossibleValues);
             if(tile.State == TileStates.Solved)
                 lblTileInfo.Text += "\n" + tile.Reason;
+        }
+
+        private void btnCreateNew_Click(object sender, EventArgs e)
+        {
+            reset();
+            for (int col = 0; col < 9; col++)
+            {
+                grdBoard.Columns.Add(col.ToString(), col.ToString());
+            }
+            grdBoard.Rows.Insert(0, 9);
+            _boardEditable = true;
+        }
+
+        private void btnSolve_Click(object sender, EventArgs e)
+        {
+            DateTime begin = DateTime.UtcNow;
+
+            solvePuzzle();
+
+            DateTime end = DateTime.UtcNow;
+            solveComplete(end - begin);
+        }
+
+        private void grdBoard_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (!_boardEditable) e.Cancel = true;
+        }
+
+        private void createNewPuzzleFromBoard()
+        {
+            _puzzle = new SmartSudokuPuzzle();
+            _puzzle.Board = new List<List<SmartSudokuTile>>();
+            foreach (DataGridViewRow row in grdBoard.Rows)
+            {
+                var puzRow = new List<SmartSudokuTile>();
+                foreach (DataGridViewCell col in row.Cells)
+                {
+                    if (col.Value == null || string.IsNullOrWhiteSpace(col.Value.ToString()))
+                        puzRow.Add(new SmartSudokuTile());
+                    else
+                        puzRow.Add(new SmartSudokuTile(int.Parse(col.Value.ToString())));
+                }
+                _puzzle.Board.Add(puzRow);
+            }
+            _puzzle.Init();
         }
     }
 }
