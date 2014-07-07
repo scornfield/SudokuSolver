@@ -42,6 +42,7 @@
             this.lblTime = new System.Windows.Forms.ToolStripLabel();
             this.btnCreateNew = new System.Windows.Forms.Button();
             this.btnSolve = new System.Windows.Forms.Button();
+            this.btnCopy = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.grdBoard)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.actionRecorderBindingSource)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -111,6 +112,7 @@
             this.lstActions.ItemHeight = 20;
             this.lstActions.Location = new System.Drawing.Point(723, 131);
             this.lstActions.Name = "lstActions";
+            this.lstActions.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lstActions.Size = new System.Drawing.Size(709, 584);
             this.lstActions.TabIndex = 11;
             // 
@@ -171,11 +173,22 @@
             this.btnSolve.UseVisualStyleBackColor = true;
             this.btnSolve.Click += new System.EventHandler(this.btnSolve_Click);
             // 
+            // btnCopy
+            // 
+            this.btnCopy.Location = new System.Drawing.Point(1340, 94);
+            this.btnCopy.Name = "btnCopy";
+            this.btnCopy.Size = new System.Drawing.Size(91, 32);
+            this.btnCopy.TabIndex = 16;
+            this.btnCopy.Text = "Copy";
+            this.btnCopy.UseVisualStyleBackColor = true;
+            this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
+            // 
             // SudokuSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1444, 984);
+            this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.btnSolve);
             this.Controls.Add(this.btnCreateNew);
             this.Controls.Add(this.toolStrip1);
@@ -209,6 +222,7 @@
         private System.Windows.Forms.ToolStripLabel lblTime;
         private System.Windows.Forms.Button btnCreateNew;
         private System.Windows.Forms.Button btnSolve;
+        private System.Windows.Forms.Button btnCopy;
     }
 }
 

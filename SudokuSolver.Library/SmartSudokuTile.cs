@@ -101,6 +101,7 @@ namespace Cornfield.SudokuSolver.Library
             ActionRecorder.Record(string.Format("{0},{1}: Setting Value {2} because {3}", XPos, YPos, val, reason));
             if (!PossibleValues.Contains(val)) 
                 throw new Exception("Trying to set the tile's value to an invalid value");
+            PossibleValues.Clear();
 
             // Set the reason for this value being set
             Reason = reason;
@@ -135,7 +136,7 @@ namespace Cornfield.SudokuSolver.Library
             // If this tile is already solved, stop here
             if (State == TileStates.Solved) return;
 
-            ActionRecorder.Record(string.Format("{0},{1}: Removing {2} from possible values.", XPos, YPos, val));
+            ActionRecorder.Record(string.Format("{0},{1}: Removing {2} from possible values {3}", XPos, YPos, val, string.Join(",",PossibleValues)));
 
             // Remove the value from the possible values list
             PossibleValues.Remove(val);
@@ -143,7 +144,7 @@ namespace Cornfield.SudokuSolver.Library
             // If we are allowed to set the value now, then do it
             if (setValue)
             {
-                SetOnlyRemainingValue();
+                CheckNakedSingle();
                 return;
             }
 
@@ -153,7 +154,7 @@ namespace Cornfield.SudokuSolver.Library
         }
 
         // Check if there is only one remaining possible value for this tile and if there is, set that as its value.
-        public void SetOnlyRemainingValue(string reason = "Only Remaining Possibility", TileConfidence confidence = TileConfidence.Certain)
+        public void CheckNakedSingle(string reason = "Naked Single", TileConfidence confidence = TileConfidence.Certain)
         {
             if (PossibleValues.Count == 1)
             {

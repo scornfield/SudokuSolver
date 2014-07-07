@@ -29,5 +29,16 @@ namespace Cornfield.SudokuSolver.Library
             }
             return ret;
         }
+
+        public static bool ContainsAll<T>(this List<T> list1, List<T> list2)
+        {
+            if (list1.Intersect(list2).Count() == list2.Count) return true;
+            return false;
+        }
+
+        public static bool ContainsAny<T>(this List<T> list1, List<T> list2)
+        {
+            return list2.Any(x => list1.Contains(x));
+        }
     }
 }

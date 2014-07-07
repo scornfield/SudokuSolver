@@ -34,17 +34,19 @@ namespace Cornfield.SudokuSolver.UI
 
             ActionRecorder.Init();
 
-            //string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
+            string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
 
-            //_puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
-            //solvePuzzle();
-            //solveComplete();
+            _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            solvePuzzle();
+            solveComplete();
         }
 
         private void btnGetNew_Click(object sender, EventArgs e)
         {
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
             _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            lblTitle.Text = string.Format("Sudoku Puzzle #{0}", _puzzle.Id);
+            reset();
             ShowBoard();
         }
 
@@ -77,9 +79,9 @@ namespace Cornfield.SudokuSolver.UI
         {
             if (_boardEditable) createNewPuzzleFromBoard();
             _puzzle.Init();
-            _puzzle.AddSolver(new PlaceFindingSolver());
-            _puzzle.AddSolver(new OccupancyTheoremSolver());
-            _puzzle.AddSolver(new EliminationSolver());
+            _puzzle.AddSolver(new HiddenSingleSolver());
+            _puzzle.AddSolver(new NakedMultipleSolver());
+            _puzzle.AddSolver(new HiddenMultipleSolver());
 
             _puzzle.Solve();
         }
@@ -167,6 +169,25 @@ namespace Cornfield.SudokuSolver.UI
                 _puzzle.Board.Add(puzRow);
             }
             _puzzle.Init();
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (object row in lstActions.Items)
+                {
+                    sb.Append(row.ToString());
+                    sb.AppendLine();
+                }
+                sb.Remove(sb.Length - 1, 1); // Just to avoid copying last empty row
+                Clipboard.SetData(System.Windows.Forms.DataFormats.Text, sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }

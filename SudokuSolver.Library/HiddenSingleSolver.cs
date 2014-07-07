@@ -9,10 +9,22 @@ using System.Threading.Tasks;
 
 namespace Cornfield.SudokuSolver.Library
 {
-    // The place finding solver works by determining if there is only one possible tile left in a group that can accept a given value.  If this is the case, it sets the tile to that value.
-    public class PlaceFindingSolver : ISudokuSolver
+    // The hidden single solver works by determining if there is only one possible tile left in a group that can accept a given value.  If this is the case, it sets the tile to that value.
+    public class HiddenSingleSolver : ISudokuSolver
     {
-        public void SolveGroup(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain)
+        public SolverType Type { get; set; }
+
+        public HiddenSingleSolver()
+        {
+            Type = SolverType.Group;
+        }
+
+        public void Solve(SmartSudokuPuzzle puzzle, TileConfidence confidence = TileConfidence.Certain)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Solve(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain)
         {
             StaticSolveGroup(group, confidence);
         }
@@ -27,12 +39,11 @@ namespace Cornfield.SudokuSolver.Library
 
                 // Get a list of tiles with this number in their possible values
                 var possibleTiles = group.Tiles.Where(x => x.State != TileStates.Solved && x.PossibleValues.Contains(num)).ToList();
-                //Console.WriteLine("Place Finding Solver: {0} Possible places for {1} in Group {2}", possibleTiles.Count, num, group.Id);
 
                 // If there is only one tile that can accept this number, set its value
                 if (possibleTiles.Count == 1)
                 {
-                    possibleTiles[0].SetValue(num, confidence, string.Format("Place Finding Solver Group {0}", group.Id));
+                    possibleTiles[0].SetValue(num, confidence, string.Format("Hidden Single Solver Group {0}", group.Id));
                 }
                     
             }
@@ -40,7 +51,7 @@ namespace Cornfield.SudokuSolver.Library
 
         public override string ToString()
         {
-            return "Place Finding Solver";
+            return "Hidden Single Solver";
         }
     }
 }

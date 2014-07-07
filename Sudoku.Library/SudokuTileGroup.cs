@@ -7,10 +7,14 @@ using Cornfield.Sudoku.Library.Interfaces;
 
 namespace Cornfield.Sudoku.Library
 {
+    public enum GroupType { Row, Column, Box, Other }
+
     public class SudokuTileGroup<T> : ISudokuTileGroup<T> where T : ISudokuTile
     {
         public int Id { get; set; }
         public List<T> Tiles { get; protected set; }
+
+        public GroupType Type { get; set; }
         
         public SudokuTileGroup()
         {

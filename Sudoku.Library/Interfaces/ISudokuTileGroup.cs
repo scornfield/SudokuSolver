@@ -11,6 +11,8 @@ namespace Cornfield.Sudoku.Library.Interfaces
         int Id { get; set; }
         List<T> Tiles { get; }
 
+        GroupType Type { get; set; }
+
         void AddTile(T tile);
         void Init();
 

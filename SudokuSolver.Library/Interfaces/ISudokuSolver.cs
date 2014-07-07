@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace Cornfield.SudokuSolver.Library.Interfaces
 {
+    public enum SolverType { Puzzle, Group }
+
     public interface ISudokuSolver
     {
-        void SolveGroup(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain);
+        SolverType Type { get; set; }   
+        void Solve(SmartSudokuPuzzle puzzle, TileConfidence confidence = TileConfidence.Certain);
+        void Solve(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain);
     }
 }

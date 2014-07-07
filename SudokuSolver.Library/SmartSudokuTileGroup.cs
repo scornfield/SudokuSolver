@@ -13,7 +13,6 @@ namespace Cornfield.SudokuSolver.Library
     {
         public List<int> AllPossibleValues = new List<int>();
         public EventHandler<TileGroupUpdatingEventArgs> TileGroupUpdated;
-        public bool InSolverQueue { get; set; }
         public bool Solved { get { return AllPossibleValues.Count == 0; } }
         public SmartSudokuTileGroup() : base()
         {
@@ -23,9 +22,6 @@ namespace Cornfield.SudokuSolver.Library
         // Initializes the tile by seting up event handlers and possible values
         public new void Init()
         {
-            // Initialize the tile to not be in the queue yet
-            InSolverQueue = false;
-
             // Add the TileSolved event handler to each tile in this group
             Tiles.ForEach(delegate(SmartSudokuTile tile) { tile.TileSolved += this.TileSolved; });
             
@@ -48,23 +44,20 @@ namespace Cornfield.SudokuSolver.Library
         public void OnTileGroupUpdated()
         {
             // If this tile group isn't already in the queue or completely solved, raise the event to add it
-            if (!InSolverQueue && !Solved)
-            {
-                EventHandler<TileGroupUpdatingEventArgs> handler = TileGroupUpdated;
-                if (handler != null)
-                    handler(this, new TileGroupUpdatingEventArgs(this));
+            if (Solved) return;
 
-                // Set this so the group knows it's already queued to avoid adding it more than once
-                InSolverQueue = true;
-            }
+            EventHandler<TileGroupUpdatingEventArgs> handler = TileGroupUpdated;
+            if (handler != null)
+                handler(this, new TileGroupUpdatingEventArgs(this));
         }
 
         // Update the possible values for this group and each of its tile to remove the given value
         public void UpdatePossibleValues(int val)
         {
             ActionRecorder.Record(string.Format("Group {0}: Removing Possible Value {1}.", Id, val));
-            //Console.WriteLine("Group {0}: Removing Possible Value {1}.", Id, val);
             AllPossibleValues.Remove(val);
+
+            if (Solved) return;
 
             // Remove this value from the possible values of all other tiles that aren't already solved.
             foreach (var tile in Tiles.Where(x => x.State != TileStates.Solved))

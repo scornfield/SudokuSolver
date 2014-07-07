@@ -16,13 +16,13 @@ namespace Cornfield.Sudoku.Library
             // Init Tile numbers, row groups, and col groups
             for (int row = 0; row < Board.Count; row++)
             {
-                var rowGrp = new G() { Id = row };
+                var rowGrp = new G() { Id = row, Type = GroupType.Row };
                 for (int col = 0; col < Board[row].Count; col++)
                 {
                     G colGrp;
                     if (TileGroups.Where(x => x.Id == Board.Count + col).Count() == 0)
                     {
-                        colGrp = new G() { Id = Board.Count + col };
+                        colGrp = new G() { Id = Board.Count + col, Type = GroupType.Column };
                         TileGroups.Add(colGrp);
                     }
                     else
@@ -38,7 +38,7 @@ namespace Cornfield.Sudoku.Library
             // Init Box Groups
             for (var index = 0; index < 9; index++)
             {
-                var grp = new G() { Id = TileGroups.Count };
+                var grp = new G() { Id = TileGroups.Count, Type = GroupType.Box };
 
                 int startRow = (int)Math.Floor(index / 3.0) * 3;
                 int startCol = (int)Math.Floor(index % 3.0) * 3;
