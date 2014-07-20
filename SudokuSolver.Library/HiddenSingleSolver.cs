@@ -19,17 +19,17 @@ namespace Cornfield.SudokuSolver.Library
             Type = SolverType.Group;
         }
 
-        public void Solve(SmartSudokuPuzzle puzzle, TileConfidence confidence = TileConfidence.Certain)
+        public void Solve(SmartSudokuPuzzle puzzle)
         {
             throw new NotImplementedException();
         }
 
-        public void Solve(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain)
+        public void Solve(SmartSudokuTileGroup group)
         {
-            StaticSolveGroup(group, confidence);
+            StaticSolveGroup(group);
         }
 
-        public static void StaticSolveGroup(SmartSudokuTileGroup group, TileConfidence confidence)
+        public static void StaticSolveGroup(SmartSudokuTileGroup group)
         {
             // For each possible value in a group (1 to the number of tiles in the group)
             for (int num = 1; num <= group.Tiles.Count; num++)
@@ -43,7 +43,7 @@ namespace Cornfield.SudokuSolver.Library
                 // If there is only one tile that can accept this number, set its value
                 if (possibleTiles.Count == 1)
                 {
-                    possibleTiles[0].SetValue(num, confidence, string.Format("Hidden Single Solver Group {0}", group.Id));
+                    possibleTiles[0].SetValue(num, string.Format("Hidden Single Solver Group {0}", group.Id));
                 }
                     
             }

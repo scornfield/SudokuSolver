@@ -13,7 +13,7 @@ namespace Cornfield.SudokuSolver.Library.Interfaces
     public interface ISudokuSolver
     {
         SolverType Type { get; set; }   
-        void Solve(SmartSudokuPuzzle puzzle, TileConfidence confidence = TileConfidence.Certain);
-        void Solve(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain);
+        void Solve(SmartSudokuPuzzle puzzle);
+        void Solve(SmartSudokuTileGroup group);
     }
 }

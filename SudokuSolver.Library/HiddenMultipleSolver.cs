@@ -20,17 +20,17 @@ namespace Cornfield.SudokuSolver.Library
             Type = SolverType.Group;
         }
 
-        public void Solve(SmartSudokuPuzzle puzzle, TileConfidence confidence = TileConfidence.Certain)
+        public void Solve(SmartSudokuPuzzle puzzle)
         {
             throw new NotImplementedException();
         }
 
-        public void Solve(SmartSudokuTileGroup group, TileConfidence confidence = TileConfidence.Certain)
+        public void Solve(SmartSudokuTileGroup group)
         {
-            StaticSolveGroup(group, confidence);
+            StaticSolveGroup(group);
         }
 
-        public static void StaticSolveGroup(SmartSudokuTileGroup group, TileConfidence confidence)
+        public static void StaticSolveGroup(SmartSudokuTileGroup group)
         {
             // If the group is solved or the number of remaining values equals the number of open tiles, then this solver won't help
             if (group.Solved || group.AllPossibleValues.Count == group.Tiles.Where(x => x.Value != null).Count()) return;
@@ -82,7 +82,7 @@ namespace Cornfield.SudokuSolver.Library
             // If any tile is down to its only remaining value now, set that value.
             foreach (var tile in group.Tiles.Where(x => x.State != TileStates.Solved))
             {
-                tile.CheckNakedSingle(string.Format("Hidden Multiple Solver Group {0}", group.Id), confidence);
+                tile.CheckNakedSingle(string.Format("Hidden Multiple Solver Group {0}", group.Id));
             }
         }
 

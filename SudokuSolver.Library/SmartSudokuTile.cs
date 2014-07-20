@@ -11,45 +11,56 @@ namespace Cornfield.SudokuSolver.Library
 {
     public enum TileStates
     {
-        NoProgress, Guessed, Solved
+        NoProgress, Solved
     }
-
-    public enum TileConfidence
-    {
-        Certain, Guess
-    }
-
 
     public class SmartSudokuTile: SudokuTile, ISudokuTile
     {
-        
-
         public override int? Value
         {
             get
             {
-                return _value ?? TempValue;
+                return _value;
             }
             protected set
             {
-                if (State == TileStates.Solved) 
-                    Console.WriteLine("Already Solved");
+                // TODO: After sufficient testing, remove this to increase efficiency
+                if (State == TileStates.Solved)
+                    throw new Exception("Trying to change value when the tile is already solved");
                 
                 // Set the value
                 _value = value;
 
-                // If the tile is not null, then set it as solved and raise the TileSolved event.
+                // If the value is not null, then set the tile as Solved and clear the PossibleValues 
                 if (_value != null)
                 {
-                    State = TileStates.Solved;
-                    if (PossibleValues != null)
-                        PossibleValues.Clear();
+                    try
+                    {
+                        State = TileStates.Solved;
+                        if (PossibleValues != null)
+                        {
+                            if (Guessed)
+                                TentativelyRemovedPossibleValues.AddRange(PossibleValues);
+                            PossibleValues.Clear();
+                        }
+                    }
+                    catch (SudokuConditionViolatedException ex)
+                    {
+                        ActionRecorder.Record(ex.Message);
+
+                        ClearGuesses();
+
+                        throw;
+                    }
                 }
             }
         }
 
         [JsonIgnore]
         public List<int> PossibleValues { get; set; }
+
+        [JsonIgnore]
+        public List<int> TentativelyRemovedPossibleValues { get; set; }
 
         private TileStates _state;
         [JsonIgnore]
@@ -60,10 +71,14 @@ namespace Cornfield.SudokuSolver.Library
             } 
             protected set 
             {
+                // Don't do anything if our state isn't actually changing
                 if (_state != value)
                 {
                     _state = value;
-                    OnTileSolved();
+
+                    // If the tile is now solved, then raise the OnTileSolved event.
+                    if(_state == TileStates.Solved)
+                        OnTileSolved();
                 }
             } 
         }
@@ -72,7 +87,7 @@ namespace Cornfield.SudokuSolver.Library
         public string Reason { get; set; }
 
         [JsonIgnore]
-        private int? TempValue { get; set; }
+        public bool Guessed { get; protected set; }
 
         // Initialize a new tile with no value.
         public SmartSudokuTile() : this(null)
@@ -83,6 +98,9 @@ namespace Cornfield.SudokuSolver.Library
         // Initialize a new tile with an existing value.
         public SmartSudokuTile(int? val) : base(val)
         {
+            Guessed = false;
+            TentativelyRemovedPossibleValues = new List<int>();
+
             if(val != null)
                 Reason = "Initialized";
         }
@@ -94,89 +112,99 @@ namespace Cornfield.SudokuSolver.Library
             return tile;
         }
 
-        private bool _solveHandled = false;
-
-        public void SetValue(int val, TileConfidence conf, string reason = "Unknown")
+        // Set the value for the tile and the reason that it was set to this value
+        public void SetValue(int val, string reason = "Unknown", bool guess = false)
         {
             ActionRecorder.Record(string.Format("{0},{1}: Setting Value {2} because {3}", XPos, YPos, val, reason));
+
+            // TODO: After sufficient testing, remove this to increase efficiency
             if (!PossibleValues.Contains(val)) 
                 throw new Exception("Trying to set the tile's value to an invalid value");
-            PossibleValues.Clear();
 
             // Set the reason for this value being set
             Reason = reason;
 
-            // If this isn't a guess, then set the value, otherwise set the temporary value
-            if (conf == TileConfidence.Certain)
-                Value = val;
-            else
-            {
-                State = TileStates.Guessed;
-                TempValue = val;
-            }
+            // Set whether this is a guess or not
+            Guessed = guess;
+
+            // Set the value
+            Value = val;
         }
+
+        // Clear out all state information associated with a guessed value
+        public void ClearValue()
+        {
+            _value = null;
+            Reason = null;
+            State = TileStates.NoProgress;
+            _solveHandled = false;
+            Guessed = false;
+        }
+
+        // This bool gets flipped when the tile is solved so that we don't raise our events more than once
+        private bool _solveHandled = false;
 
         // When the tile is solved, this creates an event handler to alert all of its groups to the change
         public void OnTileSolved()
         {
-            //Console.WriteLine("{0},{1}: Firing Events", XPos, YPos);
             EventHandler<TileSolvedEventArgs> handler = TileSolved;
+
+            // Make sure that we only handle this event once
             if (!_solveHandled && handler != null)
             {
                 _solveHandled = true;
                 handler(this, new TileSolvedEventArgs(this));
             }
-                
-            //Console.WriteLine("{0},{1}: Events Complete", XPos, YPos);
         }
 
         // Remove a value from the remaining possible values for this tile.
-        public void RemovePossibleValue(int val, bool setValue = true)
+        public void RemovePossibleValue(int val, bool guess = false, string reason = "Naked Single")
         {
             // If this tile is already solved, stop here
             if (State == TileStates.Solved) return;
 
-            ActionRecorder.Record(string.Format("{0},{1}: Removing {2} from possible values {3}", XPos, YPos, val, string.Join(",",PossibleValues)));
+            var strPossibleValues = string.Join(",", PossibleValues);
 
             // Remove the value from the possible values list
-            PossibleValues.Remove(val);
-
-            // If we are allowed to set the value now, then do it
-            if (setValue)
+            if (PossibleValues.Remove(val))
             {
-                CheckNakedSingle();
-                return;
-            }
+                ActionRecorder.Record(string.Format("{0},{1}: Removing {2} from possible values {3}", XPos, YPos, val, strPossibleValues));
 
-            // If there are no possible values left for this tile, throw an exception
-            if (PossibleValues.Count == 0)
-                throw new Exception("No Remaining Possible Values for Tile");
+                Guessed = guess;
+
+                // If this removal was trigged by a guess, then remember the value just in case
+                if (guess)
+                    TentativelyRemovedPossibleValues.Add(val);
+
+                // If there are no possible values left for this tile, throw an exception
+                if (PossibleValues.Count == 0)
+                    throw new SudokuConditionViolatedException(string.Format("No Remaining Possible Values for Tile {0},{1}", XPos, YPos));
+
+                // Check if we're down to our last possible option
+                CheckNakedSingle(reason, guess); 
+            }
+  
+        }
+
+        // Restore possible values that were eliminated by guessing
+        public void ClearGuesses()
+        {
+            // If we haven't guessed that this tile then don't try to clear it
+            if (!Guessed) return;
+
+            ClearValue();
+            PossibleValues.AddRange(TentativelyRemovedPossibleValues);
+            TentativelyRemovedPossibleValues.Clear();
         }
 
         // Check if there is only one remaining possible value for this tile and if there is, set that as its value.
-        public void CheckNakedSingle(string reason = "Naked Single", TileConfidence confidence = TileConfidence.Certain)
+        public void CheckNakedSingle(string reason = "Naked Single", bool guess = false)
         {
             if (PossibleValues.Count == 1)
             {
-                SetValue(PossibleValues[0], confidence, reason);
+                SetValue(PossibleValues[0], reason, guess);
                 return;
             }
         }
-
-        public void ClearGuess()
-        {
-            State = TileStates.NoProgress;
-            if (TempValue != null)
-                PossibleValues.Remove((int)TempValue);
-            TempValue = null;
-        }
-
-        public void ConfirmValue()
-        {
-            Value = TempValue;
-            TempValue = null;
-            PossibleValues.Clear();
-        }
-
     }
 }

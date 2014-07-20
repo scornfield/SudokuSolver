@@ -14,7 +14,8 @@ namespace Cornfield.SudokuSolver.Library
         private List<SmartSudokuTileGroup> _groupUpdatedQueue = new List<SmartSudokuTileGroup>();
         private List<ISudokuSolver> _solvers;
         private int _solverIndex = 0;
-        public List<int> _queueIndex = new List<int>(); 
+        public List<int> _queueIndex = new List<int>();
+        
         public bool Solved
         {
             get
@@ -55,9 +56,12 @@ namespace Cornfield.SudokuSolver.Library
                     if(tile.State == TileStates.Solved)
                         tile.OnTileSolved();
 
-            ActionRecorder.Record("All Tiles Initialized - Starting Solvers");
-            // Run our custom solvers
-            RunSolvers();
+            if (!Solved)
+            {
+                ActionRecorder.Record("All Tiles Initialized - Starting Solvers");
+                // Run our custom solvers
+                RunSolvers();
+            }
         }
 
         // Run each of our solvers to try to complete the puzzle
@@ -88,7 +92,11 @@ namespace Cornfield.SudokuSolver.Library
 
                 // If this is a puzzle solver, then pass the puzzle, otherwise run through the group queue.
                 if (solver.Type == SolverType.Puzzle)
+                {
+                    // Run the solver on the puzzle
+                    ActionRecorder.Record(string.Format("{0}: Processing Puzzle", solver.ToString()));
                     solver.Solve(this);
+                }
                 else
                 {
                     // Initialize our counter to the correct starting index for this solver.
@@ -133,6 +141,20 @@ namespace Cornfield.SudokuSolver.Library
             ActionRecorder.Record(string.Format("Adding Group {0} to solver queue.", args.Group.Id));
             _solverIndex = 0;
             _groupUpdatedQueue.Add(args.Group);
+        }
+
+        public void ClearGuesses()
+        {
+            foreach(var row in Board) 
+            {
+                foreach(var tile in row) 
+                {
+                    tile.ClearGuesses();
+                }
+            }
+
+            foreach (var group in TileGroups)
+                group.RecalcPossibleValues();
         }
     }
 }
