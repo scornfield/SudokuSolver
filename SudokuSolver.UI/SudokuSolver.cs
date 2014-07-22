@@ -41,10 +41,15 @@ namespace Cornfield.SudokuSolver.UI
             solveComplete();
         }
 
-        private void btnGetNew_Click(object sender, EventArgs e)
+        private void GetNewPuzzle()
         {
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
             _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+        }
+
+        private void btnGetNew_Click(object sender, EventArgs e)
+        {
+            GetNewPuzzle(); 
             lblTitle.Text = string.Format("Sudoku Puzzle #{0}", _puzzle.Id);
             reset();
             ShowBoard();
@@ -97,7 +102,7 @@ namespace Cornfield.SudokuSolver.UI
         {
             lblStatus.Text = "Solve Complete.";
             if (_puzzle.TileGroups.Any(x => !x.Solved)) lblStatus.Text += " Board is incomplete.";
-            if (_puzzle.TileGroups.Any(x => !x.IsValid())) lblStatus.Text += " Board is invalid.";
+            if (!_puzzle.IsValid()) lblStatus.Text += " Board is invalid.";
 
             ShowBoard();
             lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
@@ -189,6 +194,37 @@ namespace Cornfield.SudokuSolver.UI
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void btnRunMany_Click(object sender, EventArgs e)
+        {
+            TimeSpan totalTime = new TimeSpan();
+            int numPuzzles = 1000;
+
+            lblTitle.Text = string.Format("Running {0} Puzzles", numPuzzles);
+            Refresh();
+
+            for (int i = 0; i <= numPuzzles; i++)
+            {
+                DateTime begin = DateTime.UtcNow;
+                GetNewPuzzle();
+                //lblTitle.Text = string.Format("Sudoku Puzzle #{0}", _puzzle.Id);
+                //reset();
+                //ShowBoard();
+
+                
+
+                solvePuzzle();
+
+                DateTime end = DateTime.UtcNow;
+                //solveComplete(end - begin);
+
+                totalTime += end - begin;
+            }
+
+            lblTitle.Text = string.Format("Solved {0} Puzzles", numPuzzles);
+            lblStatus.Text = string.Format("Solved {0} puzzles in {1}ms.  {2}ms per puzzle.", numPuzzles, totalTime.TotalMilliseconds, totalTime.TotalMilliseconds / numPuzzles);
+            
         }
     }
 }

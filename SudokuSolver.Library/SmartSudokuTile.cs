@@ -34,24 +34,15 @@ namespace Cornfield.SudokuSolver.Library
                 // If the value is not null, then set the tile as Solved and clear the PossibleValues 
                 if (_value != null)
                 {
-                    try
+                    
+                    State = TileStates.Solved;
+                    if (PossibleValues != null)
                     {
-                        State = TileStates.Solved;
-                        if (PossibleValues != null)
-                        {
-                            if (Guessed)
-                                TentativelyRemovedPossibleValues.AddRange(PossibleValues);
-                            PossibleValues.Clear();
-                        }
+                        if (Guessed)
+                            TentativelyRemovedPossibleValues.AddRange(PossibleValues);
+                        PossibleValues.Clear();
                     }
-                    catch (SudokuConditionViolatedException ex)
-                    {
-                        ActionRecorder.Record(ex.Message);
-
-                        ClearGuesses();
-
-                        throw;
-                    }
+                    
                 }
             }
         }
@@ -158,10 +149,11 @@ namespace Cornfield.SudokuSolver.Library
         }
 
         // Remove a value from the remaining possible values for this tile.
-        public void RemovePossibleValue(int val, bool guess = false, string reason = "Naked Single")
+        // Returns true if the operation was successful and false if the operation has invalidated the tile.
+        public bool RemovePossibleValue(int val, bool guess = false, string reason = "Naked Single")
         {
             // If this tile is already solved, stop here
-            if (State == TileStates.Solved) return;
+            if (State == TileStates.Solved) return true;
 
             var strPossibleValues = string.Join(",", PossibleValues);
 
@@ -176,13 +168,18 @@ namespace Cornfield.SudokuSolver.Library
                 if (guess)
                     TentativelyRemovedPossibleValues.Add(val);
 
-                // If there are no possible values left for this tile, throw an exception
+                // If there are no possible values left for this tile, return false
                 if (PossibleValues.Count == 0)
-                    throw new SudokuConditionViolatedException(string.Format("No Remaining Possible Values for Tile {0},{1}", XPos, YPos));
+                {
+                    ActionRecorder.Record(string.Format("{0},{1}: ERROR: No remaining possible values.", XPos, YPos, val, strPossibleValues));
+                    return false;
+                }
+                    
 
                 // Check if we're down to our last possible option
-                CheckNakedSingle(reason, guess); 
+                CheckNakedSingle(reason, guess);
             }
+            return true;
   
         }
 

@@ -116,7 +116,7 @@ namespace Cornfield.SudokuSolver.Library
                         i++;
 
                         // If the puzzle is solved or we have processed every group for this solver already, break out of the loop.
-                        if (Solved || groupIdsProcessed.Count == TileGroups.Count) break;
+                        if (Solved || groupIdsProcessed.Count == (queueEndIndex[curSolverIndex] - queueStartIndex[curSolverIndex])) break;
 
                         // If this group is solved or we have already processed it during this iteration of this solver, move on to the next group.
                         else if (group.Solved || groupIdsProcessed.Contains(group.Id)) continue;
@@ -143,6 +143,13 @@ namespace Cornfield.SudokuSolver.Library
             _groupUpdatedQueue.Add(args.Group);
         }
 
+        // Check if the puzzle is still valid
+        public bool IsValid()
+        {
+            return !TileGroups.Any(x => !x.IsValid());
+        }
+
+        // Clear all guesses currently in the board 
         public void ClearGuesses()
         {
             foreach(var row in Board) 

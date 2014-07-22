@@ -45,12 +45,17 @@ namespace Cornfield.SudokuSolver.Library
             int val = (int)args.Tile.Value;
             bool guess = ((SmartSudokuTile)args.Tile).Guessed;
 
-            UpdatePossibleValues(val, guess);
+            if (!UpdatePossibleValues(val, guess))
+            {
+                ActionRecorder.Record(string.Format("Group {0}: ERROR: While updating possible values for the group.", Id, args.Tile.XPos, args.Tile.YPos));
+                return;
+            }
 
             // The group is invalid now
             if (!IsValid())
             {
-                throw new SudokuConditionViolatedException(string.Format("Sudoku Condition has been violated by Group {0}, game board is invalid", Id));
+                ActionRecorder.Record(string.Format("Group {0}: ERROR: Group was invalidated by solving tile {1},{2}.", Id, args.Tile.XPos, args.Tile.YPos));
+                return;
             } 
 
             OnTileGroupUpdated(guess);
@@ -68,19 +73,23 @@ namespace Cornfield.SudokuSolver.Library
         }
 
         // Update the possible values for this group and each of its tile to remove the given value
-        public void UpdatePossibleValues(int val, bool guess = false)
+        // Returns true if all updates were successful and false if there were any errors (tiles reduced to no possible remaining values)
+        public bool UpdatePossibleValues(int val, bool guess = false)
         {
             ActionRecorder.Record(string.Format("Group {0}: Removing Possible Value {1}.", Id, val));
             AllPossibleValues.Remove(val);
 
             // If the group is solved, stop here.
-            if (Solved) return;
+            if (Solved) return true;
 
             // Remove this value from the possible values of all other tiles that aren't already solved.
-            foreach (var tile in Tiles.Where(x => x.State != TileStates.Solved))
+            bool isError = false;
+            foreach (var tile in Tiles.Where(x => x.State != TileStates.Solved && x.PossibleValues.Contains(val)))
             {
-                tile.RemovePossibleValue(val, guess);
-            } 
+                if (!tile.RemovePossibleValue(val, guess))
+                    isError = true;
+            }
+            return !isError;
         }
 
         public override string ToString()
