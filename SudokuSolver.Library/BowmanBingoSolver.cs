@@ -41,25 +41,16 @@ namespace Cornfield.SudokuSolver.Library
                     var initalPossibleValues = tile.PossibleValues.ToList();
                     foreach(var num in initalPossibleValues) 
                     {
-                        try
-                        {
-                            ActionRecorder.Record(string.Format("Bowman Bingo Solver: Guessing {0} as value for {1},{2} from {3}", num, tile.XPos, tile.YPos, string.Join(",", tile.PossibleValues)));
+                        
+                        ActionRecorder.Record(string.Format("Bowman Bingo Solver: Guessing {0} as value for {1},{2} from {3}", num, tile.XPos, tile.YPos, string.Join(",", tile.PossibleValues)));
                             
-                            // Guess a value and see what happens
-                            tile.SetValue(num, "Bowman Bingo Solver", true);
+                        // Guess a value and see what happens
+                        tile.SetValue(num, "Bowman Bingo Solver", true);
 
-                            // If that guess solved the puzzle, stop guessing.
-                            if (puzzle.Solved) return;
-
-                            // This logic is a little weird, but if we didn't encounter a violation, we want to clear our guesses and try the next number in the possible values.
-                            // In essence, we are actually hoping for violations so that we can remove possible values in hopes of reducing the possibilities to one certain value.
-                            ActionRecorder.Record(string.Format("Bowman Bingo Solver: No violation encountered for guess of {0} for {1},{2}.", num, tile.XPos, tile.YPos));
-                            puzzle.ClearGuesses();
-                            continue;
-                        }
-                        catch (SudokuConditionViolatedException ex)
+                        // If that guess invalidated the puzzle, stop reset the board and remove that value as a possibility for this tile.
+                        if (!puzzle.IsValid())
                         {
-                            ActionRecorder.Record(string.Format("Bowman Bingo Solver: Value {0} for {1},{2} caused {3}", num, tile.XPos, tile.YPos, ex.Message));
+                            ActionRecorder.Record(string.Format("Bowman Bingo Solver: Value {0} for {1},{2} caused puzzle to become invalid.", num, tile.XPos, tile.YPos));
 
                             // We encountered a violation of the sudoku condition with this guess.  Reset the board and remove it from the tile's possible values and try the next number.
                             puzzle.ClearGuesses();
@@ -75,6 +66,16 @@ namespace Cornfield.SudokuSolver.Library
                             else
                                 continue;
                         }
+
+                        // If that guess solved the puzzle, stop guessing.
+                        if (puzzle.Solved) return;
+
+                        // This logic is a little weird, but if we didn't encounter a violation, we want to clear our guesses and try the next number in the possible values.
+                        // In essence, we are actually hoping for violations so that we can remove possible values in hopes of reducing the possibilities to one certain value.
+                        ActionRecorder.Record(string.Format("Bowman Bingo Solver: No violation encountered for guess of {0} for {1},{2}.", num, tile.XPos, tile.YPos));
+                        puzzle.ClearGuesses();
+                        continue;
+                        
                     }
 
                     // If we solved a tile with certainty or solved the puzzle, get out of here!
@@ -113,6 +114,11 @@ namespace Cornfield.SudokuSolver.Library
         public void Solve(SmartSudokuTileGroup group)
         {
             throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return "Bowman Bingo Solver";
         }
     }
 }

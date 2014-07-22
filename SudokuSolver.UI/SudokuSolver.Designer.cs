@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.grdBoard = new System.Windows.Forms.DataGridView();
             this.btnGetNew = new System.Windows.Forms.Button();
             this.lblTileInfo = new System.Windows.Forms.Label();
@@ -43,6 +43,7 @@
             this.btnCreateNew = new System.Windows.Forms.Button();
             this.btnSolve = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
+            this.btnRunMany = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.grdBoard)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.actionRecorderBindingSource)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -57,14 +58,14 @@
             this.grdBoard.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.grdBoard.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdBoard.ColumnHeadersVisible = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.grdBoard.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.grdBoard.DefaultCellStyle = dataGridViewCellStyle2;
             this.grdBoard.Location = new System.Drawing.Point(12, 130);
             this.grdBoard.Name = "grdBoard";
             this.grdBoard.RowHeadersVisible = false;
@@ -78,9 +79,9 @@
             // btnGetNew
             // 
             this.btnGetNew.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGetNew.Location = new System.Drawing.Point(515, 817);
+            this.btnGetNew.Location = new System.Drawing.Point(332, 817);
             this.btnGetNew.Name = "btnGetNew";
-            this.btnGetNew.Size = new System.Drawing.Size(442, 77);
+            this.btnGetNew.Size = new System.Drawing.Size(259, 86);
             this.btnGetNew.TabIndex = 3;
             this.btnGetNew.Text = "Get New Puzzle";
             this.btnGetNew.UseVisualStyleBackColor = true;
@@ -156,7 +157,7 @@
             this.btnCreateNew.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCreateNew.Location = new System.Drawing.Point(67, 817);
             this.btnCreateNew.Name = "btnCreateNew";
-            this.btnCreateNew.Size = new System.Drawing.Size(442, 77);
+            this.btnCreateNew.Size = new System.Drawing.Size(259, 86);
             this.btnCreateNew.TabIndex = 14;
             this.btnCreateNew.Text = "Create New Puzzle";
             this.btnCreateNew.UseVisualStyleBackColor = true;
@@ -165,9 +166,9 @@
             // btnSolve
             // 
             this.btnSolve.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSolve.Location = new System.Drawing.Point(963, 817);
+            this.btnSolve.Location = new System.Drawing.Point(597, 817);
             this.btnSolve.Name = "btnSolve";
-            this.btnSolve.Size = new System.Drawing.Size(442, 77);
+            this.btnSolve.Size = new System.Drawing.Size(259, 86);
             this.btnSolve.TabIndex = 15;
             this.btnSolve.Text = "Solve Puzzle";
             this.btnSolve.UseVisualStyleBackColor = true;
@@ -183,11 +184,23 @@
             this.btnCopy.UseVisualStyleBackColor = true;
             this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
             // 
+            // btnRunMany
+            // 
+            this.btnRunMany.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRunMany.Location = new System.Drawing.Point(862, 817);
+            this.btnRunMany.Name = "btnRunMany";
+            this.btnRunMany.Size = new System.Drawing.Size(259, 86);
+            this.btnRunMany.TabIndex = 17;
+            this.btnRunMany.Text = "Run Many";
+            this.btnRunMany.UseVisualStyleBackColor = true;
+            this.btnRunMany.Click += new System.EventHandler(this.btnRunMany_Click);
+            // 
             // SudokuSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1444, 984);
+            this.Controls.Add(this.btnRunMany);
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.btnSolve);
             this.Controls.Add(this.btnCreateNew);
@@ -223,6 +236,7 @@
         private System.Windows.Forms.Button btnCreateNew;
         private System.Windows.Forms.Button btnSolve;
         private System.Windows.Forms.Button btnCopy;
+        private System.Windows.Forms.Button btnRunMany;
     }
 }
 
