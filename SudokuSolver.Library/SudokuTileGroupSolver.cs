@@ -9,12 +9,12 @@ using Cornfield.SudokuSolver.Library.Interfaces;
 
 namespace Cornfield.SudokuSolver.Library
 {
-    public class SmartSudokuTileGroup : SudokuTileGroup<SmartSudokuTile>, ISudokuTileGroup<SmartSudokuTile>
+    public class SudokuTileGroupSolver : SudokuTileGroup<SudokuTileSolver>, ISudokuTileGroup<SudokuTileSolver>
     {
         public List<int> AllPossibleValues = new List<int>();
         public EventHandler<TileGroupUpdatingEventArgs> TileGroupUpdated;
         public bool Solved { get { return AllPossibleValues.Count == 0; } }
-        public SmartSudokuTileGroup() : base()
+        public SudokuTileGroupSolver() : base()
         {
 
         }
@@ -23,11 +23,11 @@ namespace Cornfield.SudokuSolver.Library
         public new void Init()
         {
             // Add the TileSolved event handler to each tile in this group
-            Tiles.ForEach(delegate(SmartSudokuTile tile) { tile.TileSolved += this.TileSolved; });
+            Tiles.ForEach(delegate(SudokuTileSolver tile) { tile.TileSolved += this.TileSolved; });
             
             // Initialize the Possible Values for the group and each tile
             for (int i = 1; i <= Tiles.Count; i++) { AllPossibleValues.Add(i); }
-            Tiles.ForEach(delegate(SmartSudokuTile tile) { if(tile.State != TileStates.Solved) tile.PossibleValues = AllPossibleValues.ToList(); });
+            Tiles.ForEach(delegate(SudokuTileSolver tile) { if(tile.State != TileStates.Solved) tile.PossibleValues = AllPossibleValues.ToList(); });
         }
 
         public void RecalcPossibleValues()
@@ -43,11 +43,11 @@ namespace Cornfield.SudokuSolver.Library
         public void TileSolved(object sender, TileSolvedEventArgs args)
         {
             int val = (int)args.Tile.Value;
-            bool guess = ((SmartSudokuTile)args.Tile).Guessed;
+            bool guess = ((SudokuTileSolver)args.Tile).Guessed;
 
             if (!UpdatePossibleValues(val, guess))
             {
-                ActionRecorder.Record(string.Format("Group {0}: ERROR: While updating possible values for the group.", Id, args.Tile.XPos, args.Tile.YPos));
+                ActionRecorder.Record(string.Format("Group {0}: ERROR: While removing {1} from possible values for the group.", Id, val));
                 return;
             }
 

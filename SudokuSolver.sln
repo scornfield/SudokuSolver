@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SudokuSolver.Library", "Sud
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku.Library", "Sudoku.Library\Sudoku.Library.csproj", "{DE6624E2-09D1-4795-94EE-9AEBCBF51AFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SudokuSolver.UI", "SudokuSolver.UI\SudokuSolver.UI.csproj", "{86F22A98-B58E-4699-978E-3C841D8005B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SudokuSolver.Test", "SudokuSolver.Test\SudokuSolver.Test.csproj", "{86F22A98-B58E-4699-978E-3C841D8005B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

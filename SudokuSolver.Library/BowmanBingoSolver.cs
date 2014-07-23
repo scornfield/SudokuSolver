@@ -21,16 +21,13 @@ namespace Cornfield.SudokuSolver.Library
             Type = SolverType.Puzzle;
         }
 
-        public void Solve(SmartSudokuPuzzle puzzle)
+        public void Solve(SudokuPuzzleSolver puzzle)
         {
             // Start at the first tile in the board
             int y = 0, x = 0;
             
             // This is the number of possible values we're willing to guess at for a tile.  Start low and increase if we need to, but this will improve our odds.
             int numPossibleValues = 2;
-
-            // Whether a tile has been reduced to its last possible value and thus been solved.  Use this to break out of our main loop.
-            bool certainMoveMade = false;
 
             while (!puzzle.Solved)
             {
@@ -56,30 +53,28 @@ namespace Cornfield.SudokuSolver.Library
                             puzzle.ClearGuesses();
                             tile.RemovePossibleValue(num, false, "Bowman Bingo Eliminating Impossible Value");
 
-                            // If removing this value reduced the tile to its last possible value, then this has to be the value and we can break out of this solver.
-                            // Otherwise move on to our next guess for this tile.
+                            // If removing this value reduced the tile to its last possible value and thus solved the tile, we can break out of this solver.
                             if (tile.State == TileStates.Solved)
-                            {
-                                certainMoveMade = true;
                                 return;
+
+                            // If we aren't solved, then we need to inform our groups that our remaining values have changed so that they know to run other solvers later on.
+                            foreach (var group in puzzle.TileGroups.Where(grp => tile.GroupIds.Contains(grp.Id)))
+                            {
+                                group.OnTileGroupUpdated();
                             }
-                            else
-                                continue;
                         }
 
                         // If that guess solved the puzzle, stop guessing.
-                        if (puzzle.Solved) return;
+                        //if (puzzle.Solved) return;
 
                         // This logic is a little weird, but if we didn't encounter a violation, we want to clear our guesses and try the next number in the possible values.
-                        // In essence, we are actually hoping for violations so that we can remove possible values in hopes of reducing the possibilities to one certain value.
+                        // In essence, we are actually hoping for violations so that we can remove possible values and hopefully reduce the possibilities to one certain value.
                         ActionRecorder.Record(string.Format("Bowman Bingo Solver: No violation encountered for guess of {0} for {1},{2}.", num, tile.XPos, tile.YPos));
-                        puzzle.ClearGuesses();
-                        continue;
-                        
+                        puzzle.ClearGuesses();                        
                     }
 
                     // If we solved a tile with certainty or solved the puzzle, get out of here!
-                    if (certainMoveMade || puzzle.Solved)
+                    if (tile.State == TileStates.Solved)
                         return;
 
                     // Clear all guesses in the puzzle and try another tile
@@ -111,7 +106,7 @@ namespace Cornfield.SudokuSolver.Library
             }
         }
 
-        public void Solve(SmartSudokuTileGroup group)
+        public void Solve(SudokuTileGroupSolver group)
         {
             throw new NotImplementedException();
         }

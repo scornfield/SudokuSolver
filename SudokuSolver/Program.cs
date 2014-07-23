@@ -29,7 +29,7 @@ namespace Cornfield.SudokuSolver
 
                 TimeSpan begin = Process.GetCurrentProcess().TotalProcessorTime;
 
-                StandardSukoduPuzzle<SmartSudokuTileGroup, SmartSudokuTile> puz = JsonConvert.DeserializeObject<StandardSukoduPuzzle<SmartSudokuTileGroup, SmartSudokuTile>>(json);
+                StandardSukoduPuzzle<SudokuTileGroupSolver, SudokuTileSolver> puz = JsonConvert.DeserializeObject<StandardSukoduPuzzle<SudokuTileGroupSolver, SudokuTileSolver>>(json);
                 puz.Solver = "Andrew Nguyen";
                 puz.InitTileGroups();
 

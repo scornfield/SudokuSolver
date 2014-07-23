@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Cornfield.Sudoku.Library;
 using Cornfield.Sudoku.Library.Interfaces;
-using Newtonsoft.Json;
 
 namespace Cornfield.SudokuSolver.Library
 {
@@ -14,7 +13,7 @@ namespace Cornfield.SudokuSolver.Library
         NoProgress, Solved
     }
 
-    public class SmartSudokuTile: SudokuTile, ISudokuTile
+    public class SudokuTileSolver: SudokuTile, ISudokuTile
     {
         public override int? Value
         {
@@ -47,14 +46,11 @@ namespace Cornfield.SudokuSolver.Library
             }
         }
 
-        [JsonIgnore]
         public List<int> PossibleValues { get; set; }
 
-        [JsonIgnore]
         public List<int> TentativelyRemovedPossibleValues { get; set; }
 
         private TileStates _state;
-        [JsonIgnore]
         public TileStates State {
             get
             {
@@ -74,20 +70,18 @@ namespace Cornfield.SudokuSolver.Library
             } 
         }
         
-        [JsonIgnore]
         public string Reason { get; set; }
 
-        [JsonIgnore]
         public bool Guessed { get; protected set; }
 
         // Initialize a new tile with no value.
-        public SmartSudokuTile() : this(null)
+        public SudokuTileSolver() : this(null)
         {
             State = TileStates.NoProgress;
         }
 
         // Initialize a new tile with an existing value.
-        public SmartSudokuTile(int? val) : base(val)
+        public SudokuTileSolver(int? val) : base(val)
         {
             Guessed = false;
             TentativelyRemovedPossibleValues = new List<int>();
@@ -97,9 +91,9 @@ namespace Cornfield.SudokuSolver.Library
         }
 
         // Initialize the tile from an integer.  Used for deserializing the Json object.
-        public static implicit operator SmartSudokuTile(Int64 val)
+        public static implicit operator SudokuTileSolver(Int64 val)
         {
-            SmartSudokuTile tile = val == 0 ? new SmartSudokuTile() : new SmartSudokuTile((int)val);
+            SudokuTileSolver tile = val == 0 ? new SudokuTileSolver() : new SudokuTileSolver((int)val);
             return tile;
         }
 
@@ -171,7 +165,7 @@ namespace Cornfield.SudokuSolver.Library
                 // If there are no possible values left for this tile, return false
                 if (PossibleValues.Count == 0)
                 {
-                    ActionRecorder.Record(string.Format("{0},{1}: ERROR: No remaining possible values.", XPos, YPos, val, strPossibleValues));
+                    ActionRecorder.Record(string.Format("{0},{1}: ERROR: No remaining possible values.", XPos, YPos));
                     return false;
                 }
                     

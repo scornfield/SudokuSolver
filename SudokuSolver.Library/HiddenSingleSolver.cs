@@ -19,17 +19,17 @@ namespace Cornfield.SudokuSolver.Library
             Type = SolverType.Group;
         }
 
-        public void Solve(SmartSudokuPuzzle puzzle)
+        public void Solve(SudokuPuzzleSolver puzzle)
         {
             throw new NotImplementedException();
         }
 
-        public void Solve(SmartSudokuTileGroup group)
+        public void Solve(SudokuTileGroupSolver group)
         {
             StaticSolveGroup(group);
         }
 
-        public static void StaticSolveGroup(SmartSudokuTileGroup group)
+        public static void StaticSolveGroup(SudokuTileGroupSolver group)
         {
             // For each possible value in a group (1 to the number of tiles in the group)
             for (int num = 1; num <= group.Tiles.Count; num++)

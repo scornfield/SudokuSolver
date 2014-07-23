@@ -40,6 +40,11 @@ namespace Cornfield.Sudoku.Library
             return tile;
         }
 
+        public static implicit operator int(SudokuTile tile)
+        {
+            return (int)tile.Value;
+        }
+
         public override string ToString()
         {
             return string.Format("{0}", Value == null ? " " : Value.ToString());

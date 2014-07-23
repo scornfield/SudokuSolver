@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Cornfield.SudokuSolver.Library
 {
-    public class SmartSudokuPuzzle : StandardSukoduPuzzle<SmartSudokuTileGroup, SmartSudokuTile>, ISudokuPuzzle<SmartSudokuTileGroup, SmartSudokuTile>
+    public class SudokuPuzzleSolver : StandardSukoduPuzzle<SudokuTileGroupSolver, SudokuTileSolver>, ISudokuPuzzle<SudokuTileGroupSolver, SudokuTileSolver>
     {
-        private List<SmartSudokuTileGroup> _groupUpdatedQueue = new List<SmartSudokuTileGroup>();
+        private List<SudokuTileGroupSolver> _groupUpdatedQueue = new List<SudokuTileGroupSolver>();
         private List<ISudokuSolver> _solvers;
         private int _solverIndex = 0;
         public List<int> _queueIndex = new List<int>();

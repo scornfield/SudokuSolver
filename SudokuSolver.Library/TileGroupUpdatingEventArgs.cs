@@ -8,11 +8,11 @@ namespace Cornfield.SudokuSolver.Library
 {
     public class TileGroupUpdatingEventArgs : EventArgs
     {
-        public TileGroupUpdatingEventArgs(SmartSudokuTileGroup group)
+        public TileGroupUpdatingEventArgs(SudokuTileGroupSolver group)
         {
             Group = group;
         }
 
-        public SmartSudokuTileGroup Group { get; set; }
+        public SudokuTileGroupSolver Group { get; set; }
     }
 }

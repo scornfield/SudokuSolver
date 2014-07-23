@@ -13,7 +13,7 @@ namespace Cornfield.SudokuSolver.Library.Interfaces
     public interface ISudokuSolver
     {
         SolverType Type { get; set; }   
-        void Solve(SmartSudokuPuzzle puzzle);
-        void Solve(SmartSudokuTileGroup group);
+        void Solve(SudokuPuzzleSolver puzzle);
+        void Solve(SudokuTileGroupSolver group);
     }
 }

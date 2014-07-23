@@ -20,17 +20,17 @@ namespace Cornfield.SudokuSolver.Library
             Type = SolverType.Group;
         }
 
-        public void Solve(SmartSudokuPuzzle puzzle)
+        public void Solve(SudokuPuzzleSolver puzzle)
         {
             throw new NotImplementedException();
         }
 
-        public void Solve(SmartSudokuTileGroup group)
+        public void Solve(SudokuTileGroupSolver group)
         {
             StaticSolveGroup(group);
         }
 
-        public static void StaticSolveGroup(SmartSudokuTileGroup group)
+        public static void StaticSolveGroup(SudokuTileGroupSolver group)
         {
             // If the group is solved or the number of remaining values equals the number of open tiles, then this solver won't help
             if (group.Solved || group.AllPossibleValues.Count == group.Tiles.Where(x => x.Value != null).Count()) return;
@@ -45,7 +45,7 @@ namespace Cornfield.SudokuSolver.Library
                 if (combo.Count == group.AllPossibleValues.Count) continue;
 
                 // Find tiles that can be solved by this any of the values in this combination
-                var matches = new List<SmartSudokuTile>();
+                var matches = new List<SudokuTileSolver>();
                 foreach (var tile in group.Tiles.Where(x => x.State != TileStates.Solved))
                 {
                     if (tile.PossibleValues.ContainsAny(combo))

@@ -15,11 +15,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Cornfield.SudokuSolver.UI
+namespace Cornfield.SudokuSolver.Test
 {
     public partial class SudokuSolver : Form
     {
-        protected SmartSudokuPuzzle _puzzle;
+        protected SudokuPuzzleSolver _puzzle;
         protected bool _boardEditable = false;
         public SudokuSolver()
         {
@@ -36,7 +36,8 @@ namespace Cornfield.SudokuSolver.UI
 
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/test");
 
-            _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            _puzzle = JsonConvert.DeserializeObject<SudokuPuzzleSolver>(json);
+            _puzzle.Solver = "Steven Cornfield";
             solvePuzzle();
             solveComplete();
         }
@@ -44,7 +45,8 @@ namespace Cornfield.SudokuSolver.UI
         private void GetNewPuzzle()
         {
             string json = getJsonBoard("http://codecampcontest.azurewebsites.net/api/random");
-            _puzzle = JsonConvert.DeserializeObject<SmartSudokuPuzzle>(json);
+            _puzzle = JsonConvert.DeserializeObject<SudokuPuzzleSolver>(json);
+            _puzzle.Solver = "Steven Cornfield";
         }
 
         private void btnGetNew_Click(object sender, EventArgs e)
@@ -80,6 +82,28 @@ namespace Cornfield.SudokuSolver.UI
             return json;
         }
 
+        private string submitJsonBoard()
+        {
+            var request = (HttpWebRequest)WebRequest.Create("http://codecampcontest.azurewebsites.net/api/checkanswer");
+
+            var data = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(new SerializablePuzzle(_puzzle)));
+
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = data.Length;
+
+            using (var stream = request.GetRequestStream())
+            {
+                stream.Write(data, 0, data.Length);
+            }
+
+            var response = (HttpWebResponse)request.GetResponse();
+
+            var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+
+            return responseString;
+        }
+
         private void solvePuzzle() 
         {
             if (_boardEditable) createNewPuzzleFromBoard();
@@ -100,12 +124,19 @@ namespace Cornfield.SudokuSolver.UI
 
         private void solveComplete()
         {
+            if (_puzzle.Solved && _puzzle.IsValid())
+            {
+                submitJsonBoard();
+            }
+
             lblStatus.Text = "Solve Complete.";
             if (_puzzle.TileGroups.Any(x => !x.Solved)) lblStatus.Text += " Board is incomplete.";
             if (!_puzzle.IsValid()) lblStatus.Text += " Board is invalid.";
 
             ShowBoard();
             lstActions.Items.AddRange(ActionRecorder.Actions.ToArray());
+
+            txtJson.Text = JsonConvert.SerializeObject(new SerializablePuzzle(_puzzle));
         }
 
         private void ShowBoard()
@@ -117,14 +148,14 @@ namespace Cornfield.SudokuSolver.UI
             {
                 grdBoard.Columns.Add(col.ToString(), col.ToString());
             }
-            _puzzle.Board.ForEach(delegate(List<SmartSudokuTile> row) { grdBoard.Rows.Add(row.ToArray<object>()); });
+            _puzzle.Board.ForEach(delegate(List<SudokuTileSolver> row) { grdBoard.Rows.Add(row.ToArray<object>()); });
         }
 
         private void grdBoard_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (_boardEditable) return;
 
-            var tile = ((SmartSudokuTile)grdBoard.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
+            var tile = ((SudokuTileSolver)grdBoard.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
             if (tile == null) return;
 
             lblTileInfo.Text = tile.PossibleValues == null || tile.PossibleValues.Count == 0 ? "No Possible Values" : string.Join(", ", tile.PossibleValues);
@@ -160,17 +191,17 @@ namespace Cornfield.SudokuSolver.UI
 
         private void createNewPuzzleFromBoard()
         {
-            _puzzle = new SmartSudokuPuzzle();
-            _puzzle.Board = new List<List<SmartSudokuTile>>();
+            _puzzle = new SudokuPuzzleSolver();
+            _puzzle.Board = new List<List<SudokuTileSolver>>();
             foreach (DataGridViewRow row in grdBoard.Rows)
             {
-                var puzRow = new List<SmartSudokuTile>();
+                var puzRow = new List<SudokuTileSolver>();
                 foreach (DataGridViewCell col in row.Cells)
                 {
                     if (col.Value == null || string.IsNullOrWhiteSpace(col.Value.ToString()))
-                        puzRow.Add(new SmartSudokuTile());
+                        puzRow.Add(new SudokuTileSolver());
                     else
-                        puzRow.Add(new SmartSudokuTile(int.Parse(col.Value.ToString())));
+                        puzRow.Add(new SudokuTileSolver(int.Parse(col.Value.ToString())));
                 }
                 _puzzle.Board.Add(puzRow);
             }
@@ -199,31 +230,48 @@ namespace Cornfield.SudokuSolver.UI
         private void btnRunMany_Click(object sender, EventArgs e)
         {
             TimeSpan totalTime = new TimeSpan();
-            int numPuzzles = 1000;
+            int numPuzzles = 100;
 
             lblTitle.Text = string.Format("Running {0} Puzzles", numPuzzles);
             Refresh();
+            int i = 0;
 
-            for (int i = 0; i <= numPuzzles; i++)
+            for (i = 0; i < numPuzzles; i++)
             {
+                ActionRecorder.Actions.Clear();
                 DateTime begin = DateTime.UtcNow;
                 GetNewPuzzle();
                 //lblTitle.Text = string.Format("Sudoku Puzzle #{0}", _puzzle.Id);
-                //reset();
+                reset();
                 //ShowBoard();
-
-                
 
                 solvePuzzle();
 
                 DateTime end = DateTime.UtcNow;
+                totalTime += end - begin;
                 //solveComplete(end - begin);
 
-                totalTime += end - begin;
+                if (!_puzzle.Solved || !_puzzle.IsValid())
+                {
+                    ShowBoard();
+                    solveComplete(totalTime);
+                    MessageBox.Show("Incomplete or invalid puzzle.  Sorry...");
+                    break;
+                }
+                else
+                {
+                    if (submitJsonBoard() != "true")
+                    {
+                        ShowBoard();
+                        solveComplete(totalTime);
+                        MessageBox.Show("Incomplete or invalid puzzle.  Sorry...");
+                        break;
+                    }
+                }
             }
 
-            lblTitle.Text = string.Format("Solved {0} Puzzles", numPuzzles);
-            lblStatus.Text = string.Format("Solved {0} puzzles in {1}ms.  {2}ms per puzzle.", numPuzzles, totalTime.TotalMilliseconds, totalTime.TotalMilliseconds / numPuzzles);
+            lblTitle.Text = string.Format("Solved {0} Puzzles", i);
+            lblStatus.Text = string.Format("Solved {0} puzzles in {1}ms.  {2}ms per puzzle.", i, totalTime.TotalMilliseconds, totalTime.TotalMilliseconds / i);
             
         }
     }

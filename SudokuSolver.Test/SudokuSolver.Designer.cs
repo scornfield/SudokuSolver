@@ -1,4 +1,4 @@
-﻿namespace Cornfield.SudokuSolver.UI
+﻿namespace Cornfield.SudokuSolver.Test
 {
     partial class SudokuSolver
     {
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.grdBoard = new System.Windows.Forms.DataGridView();
             this.btnGetNew = new System.Windows.Forms.Button();
             this.lblTileInfo = new System.Windows.Forms.Label();
@@ -44,6 +44,7 @@
             this.btnSolve = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnRunMany = new System.Windows.Forms.Button();
+            this.txtJson = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.grdBoard)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.actionRecorderBindingSource)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -58,14 +59,14 @@
             this.grdBoard.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.grdBoard.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdBoard.ColumnHeadersVisible = false;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.grdBoard.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.grdBoard.DefaultCellStyle = dataGridViewCellStyle1;
             this.grdBoard.Location = new System.Drawing.Point(12, 130);
             this.grdBoard.Name = "grdBoard";
             this.grdBoard.RowHeadersVisible = false;
@@ -195,11 +196,20 @@
             this.btnRunMany.UseVisualStyleBackColor = true;
             this.btnRunMany.Click += new System.EventHandler(this.btnRunMany_Click);
             // 
+            // txtJson
+            // 
+            this.txtJson.Location = new System.Drawing.Point(723, 722);
+            this.txtJson.Multiline = true;
+            this.txtJson.Name = "txtJson";
+            this.txtJson.Size = new System.Drawing.Size(708, 89);
+            this.txtJson.TabIndex = 18;
+            // 
             // SudokuSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1444, 984);
+            this.Controls.Add(this.txtJson);
             this.Controls.Add(this.btnRunMany);
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.btnSolve);
@@ -237,6 +247,7 @@
         private System.Windows.Forms.Button btnSolve;
         private System.Windows.Forms.Button btnCopy;
         private System.Windows.Forms.Button btnRunMany;
+        private System.Windows.Forms.TextBox txtJson;
     }
 }
 
