@@ -111,6 +111,7 @@ namespace Cornfield.SudokuSolver.Test
             _puzzle.AddSolver(new HiddenSingleSolver());
             _puzzle.AddSolver(new NakedMultipleSolver());
             _puzzle.AddSolver(new HiddenMultipleSolver());
+            _puzzle.AddSolver(new IntersectionRemovalSolver());
             _puzzle.AddSolver(new BowmanBingoSolver());
 
             _puzzle.Solve();

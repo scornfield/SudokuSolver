@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="ActionRecorder.cs" />
     <Compile Include="BowmanBingoSolver.cs" />
+    <Compile Include="IntersectionRemovalSolver.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="HiddenSingleSolver.cs" />
     <Compile Include="Interfaces\ISudokuSolver.cs" />

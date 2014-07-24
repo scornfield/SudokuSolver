@@ -21,7 +21,7 @@ namespace Cornfield.Sudoku.Library
             Tiles = new List<T>();
         }
 
-        public void AddTile(T tile)
+        public virtual void AddTile(T tile)
         {
             Tiles.Add(tile);
             tile.GroupIds.Add(this.Id);

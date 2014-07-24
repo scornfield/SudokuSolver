@@ -92,6 +92,15 @@ namespace Cornfield.SudokuSolver.Library
             return !isError;
         }
 
+        public override void AddTile(SudokuTileSolver tile) 
+        {
+            base.AddTile(tile);
+
+            if (Type == GroupType.Row) tile.RowGroup = this;
+            if (Type == GroupType.Column) tile.ColumnGroup = this;
+            if (Type == GroupType.Box) tile.BoxGroup = this;
+        }
+
         public override string ToString()
         {
             return string.Format("{0}: {1}, {2}", Id, IsValid() ? "Valid" : "Not Valid", Solved ? "Solved" : "Not Solved");

@@ -29,6 +29,7 @@ namespace Cornfield.Sudoku.Library
                         colGrp = TileGroups.First(x => x.Id == Board.Count + col);
                     rowGrp.AddTile(Board[row][col]);
                     colGrp.AddTile(Board[row][col]);
+
                     Board[row][col].XPos = col;
                     Board[row][col].YPos = row;
                 }
@@ -44,8 +45,12 @@ namespace Cornfield.Sudoku.Library
                 int startCol = (int)Math.Floor(index % 3.0) * 3;
 
                 for (int row = startRow; row < startRow + 3; row++)
+                {
                     for (int col = startCol; col < startCol + 3; col++)
+                    {
                         grp.AddTile(Board[row][col]);
+                    }
+                }
 
                 TileGroups.Add(grp);
             }

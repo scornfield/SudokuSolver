@@ -46,6 +46,10 @@ namespace Cornfield.SudokuSolver.Library
             }
         }
 
+        public SudokuTileGroupSolver RowGroup { get; set; }
+        public SudokuTileGroupSolver ColumnGroup { get; set; }
+        public SudokuTileGroupSolver BoxGroup { get; set; }
+
         public List<int> PossibleValues { get; set; }
 
         public List<int> TentativelyRemovedPossibleValues { get; set; }
@@ -144,7 +148,12 @@ namespace Cornfield.SudokuSolver.Library
 
         // Remove a value from the remaining possible values for this tile.
         // Returns true if the operation was successful and false if the operation has invalidated the tile.
-        public bool RemovePossibleValue(int val, bool guess = false, string reason = "Naked Single")
+        public bool RemovePossibleValue(int val, string reason = "Naked Single")
+        {
+            return RemovePossibleValue(val, false, reason);
+        }
+
+        public bool RemovePossibleValue(int val, bool guess, string reason = "Naked Single")
         {
             // If this tile is already solved, stop here
             if (State == TileStates.Solved) return true;

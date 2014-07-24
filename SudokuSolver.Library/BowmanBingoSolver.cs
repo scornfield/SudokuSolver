@@ -51,7 +51,7 @@ namespace Cornfield.SudokuSolver.Library
 
                             // We encountered a violation of the sudoku condition with this guess.  Reset the board and remove it from the tile's possible values and try the next number.
                             puzzle.ClearGuesses();
-                            tile.RemovePossibleValue(num, false, "Bowman Bingo Eliminating Impossible Value");
+                            tile.RemovePossibleValue(num, "Bowman Bingo Eliminating Impossible Value");
 
                             // If removing this value reduced the tile to its last possible value and thus solved the tile, we can break out of this solver.
                             if (tile.State == TileStates.Solved)

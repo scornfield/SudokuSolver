@@ -24,6 +24,7 @@ namespace Cornfield.Sudoku.Library
         }
 
         public List<int> GroupIds { get; protected set; }
+
         public EventHandler<TileSolvedEventArgs> TileSolved;
 
         public SudokuTile() : this(null) { }
